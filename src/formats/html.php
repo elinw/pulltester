@@ -315,18 +315,19 @@ class PullTesterFormatHtml
 
 		$html[] = '<div class="footer">'
 			. 'Generated on ' . date('d-M-Y H:i P T e')
-			. '<br /><small><small>C\'mon, I spent <span class="totalruntime">' . $totalTime . '</span> seconds generating this pages (excluding tests).... </small></small>'
+			. '<br /><small>C\'mon, I spent <span class="totalruntime">' . $totalTime . '</span> seconds generating these pages (excluding tests).... </small>'
 			. '<span class="havefun">have Fun</span> =;)<br />'
-			. '<em>BTW</em>: If you want to run this tests on your own machine - The source code is <a href="https://github.com/ianmacl/pulltester/tree/elkuku">available on GitHub</a>,'
+			. '<em>BTW</em>: If you want to run this tests on your own machine:'
+			.'<br/> The source code is <a href="https://github.com/ianmacl/pulltester/tree/elkuku">available on GitHub</a>,'
 			. ', based on <a href="https://github.com/ianmacl/pulltester">Ian MacLennan\'s PullTester</a> with signifiant enhancements by <a href="https://github.com/elkuku/pulltester">Nikolai Plath</a>.'
 			. '</div>';
 
-		$html[] = '<div class="system-specs">';
-		$html[] = shell_exec('pear version') . ' &bull;';
-		$html[] = shell_exec('phpunit --version') . ' &bull;';
-		$html[] = shell_exec('phpcs --version') . ' &bull;';
-		$html[] = shell_exec('mysql --version') . ' &bull;';
-		$html[] = shell_exec('psql --version') . ' &bull;';
+		$html[] = '<div class="system-specs"><br/>';
+		$html[] = shell_exec('pear version') . '<br/> &bull;';
+		$html[] = shell_exec('phpunit --version') . '<br/> &bull;';
+		$html[] = shell_exec('phpcs --version') . '<br/> &bull;';
+		$html[] = shell_exec('mysql --version') . '<br/> &bull;';
+		$html[] = shell_exec('psql --version') . '<br/> &bull;';
 		$html[] = '</div>';
 
 		$html[] = '</body>';
