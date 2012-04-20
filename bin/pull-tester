@@ -1,0 +1,51 @@
+#!/usr/bin/php
+<?php
+/**
+ * Distribution bootstrap file for the Joomla Pull Request Tester application.
+ *
+ * @package    Joomla.PullTester
+ *
+ * @copyright  Copyright (C) 2011 - 2012 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE
+ */
+
+// Bootstrap the application.
+$path = getenv('PT_HOME');
+if ($path)
+{
+	require_once $path . '/bootstrap.php';
+}
+else
+{
+	require_once dirname(__DIR__) . '/code/bootstrap.php';
+}
+
+// Allow the application to run as long as is necessary.
+ini_set('max_execution_time', 0);
+
+// Note, you would not use these settings in production.
+error_reporting(E_ALL);
+ini_set('display_errors', true);
+define('JDEBUG', false);
+
+// Set error handler to echo.
+JLog::addLogger(array('logger' => 'echo'), JLog::ALL);
+
+// Instantiate the application.
+$application = JApplicationCli::getInstance('PTApplicationCli');
+
+// Store the application.
+JFactory::$application = $application;
+
+// Wrap the execution in a try statement to catch any exceptions thrown anywhere in the script.
+try
+{
+	// Execute the application.
+	$application->execute();
+}
+catch (Exception $e)
+{
+	// An exception has been caught, just echo the message.
+	fwrite(STDOUT, $e->getMessage() . "\n");
+	exit($e->getCode());
+}
