@@ -30,9 +30,9 @@
 	"app_force_ssl":"0",
 	"app_identity":null,
 
-	// The GitHub repository.
 	"github":{
-		"api": "https\:\/\/api.github.com",
+		"api": "https:\/\/api.github.com",
+		"host": "https:\/\/github.com",
 		"user": "joomla",
 		"repo": "joomla-platform"
 	},
@@ -50,5 +50,5 @@
 	"cache_handler":"file",
 	
 	"session_lifetime":"60",
-	"session_handler":"database",
+	"session_handler":"database"
 }

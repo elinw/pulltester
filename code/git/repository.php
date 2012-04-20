@@ -34,6 +34,12 @@ class PTGitRepository
 		$this->_root = $root;
 	}
 
+	public function exists()
+	{
+		// If we don't have a configuration file for the repository it doesn't exist.
+		return file_exists($this->_root . '/.git/config');
+	}
+	
 	public function create($remote = 'git://github.com/joomla/joomla-platform.git')
 	{
 		// Initialize variables.
@@ -51,7 +57,13 @@ class PTGitRepository
 			throw new InvalidArgumentException('Repository already exists at ' . $this->_root . '.');
 		}
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('The clone failed from remote %s with code %d and message %s.', $remote, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function fetch($remote = 'origin')
@@ -60,8 +72,6 @@ class PTGitRepository
 		$out = array();
 		$return = null;
 		
-		var_dump($this->_getRemotes());
-		
 		// Ensure that either the remote exists or is a valid URL.
 		if (!filter_var($remote, FILTER_VALIDATE_URL) && !in_array($remote, $this->_getRemotes()))
 		{
@@ -69,10 +79,18 @@ class PTGitRepository
 		}
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git fetch -q ' . escapeshellarg($remote), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('The fetch failed from remote %s with code %d and message %s.', $remote, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function merge($branch = 'origin/master')
@@ -82,10 +100,18 @@ class PTGitRepository
 		$return = null;
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git merge ' . escapeshellarg($branch), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Unable to merge branch %s with code %d and message %s.', $branch, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function remoteAdd($name = 'joomla', $url = 'git@github.com:joomla/joomla-platform.git')
@@ -101,10 +127,18 @@ class PTGitRepository
 		}
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git remote add ' . escapeshellarg($name) . ' ' . escapeshellarg($url), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('The remote %s could not be added from %s with code %d and message %s.', $name, $url, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function remoteSetUrl($name = 'joomla', $url = 'git@github.com:joomla/joomla-platform.git')
@@ -120,10 +154,18 @@ class PTGitRepository
 		}
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git remote set-url ' . escapeshellarg($name) . ' ' . escapeshellarg($url), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Could not set the url %s for remote %s. Error code %d and message %s.', $url, $name, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function remoteRemove($name = 'joomla')
@@ -139,10 +181,18 @@ class PTGitRepository
 		}
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git remote rm ' . escapeshellarg($name), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('The remote %s could not be removed with code %d and message %s.', $name, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function branchCreate($name = 'staging', $parent = 'master', $parentRemote = null)
@@ -166,10 +216,18 @@ class PTGitRepository
 		}
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git checkout -b ' . escapeshellarg($name) . ' ' . escapeshellarg($parent), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Branch %s could not be created with code %d and message %s.', $name, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function branchRemove($name = 'staging')
@@ -185,10 +243,18 @@ class PTGitRepository
 		}
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git branch -D ' . escapeshellarg($name), $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Branch %s could not be removed with code %d and message %s.', $name, $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function clean()
@@ -198,10 +264,18 @@ class PTGitRepository
 		$return = null;
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git clean -fd', $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Failure cleaning the repository with code %d and message %s.', $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	public function reset($hard = true)
@@ -213,10 +287,18 @@ class PTGitRepository
 		$flag = $hard ? ' --hard' : '';
 		
 		// Execute the command.
+		$wd = getcwd();
 		chdir($this->_root);
 		exec('git reset' . $flag, $out, $return);
+		chdir($wd);
 		
-		return $return === 0 ? true : false;
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Failure resetting the repository with code %d and message %s.', $return, implode("\n", $out)));
+		}
+		
+		return $this;
 	}
 
 	private function _getBranches()

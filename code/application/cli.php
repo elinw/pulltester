@@ -34,7 +34,7 @@ class PTApplicationCli extends JApplicationCli
 	public function doExecute()
 	{
 		// Check if help is needed.
-		if ($this->input->get('h') || $this->input->get('help'))
+		if ($this->input->get('h') || $this->input->get('help') || empty($this->input->args[0]))
 		{
 			$this->help();
 
