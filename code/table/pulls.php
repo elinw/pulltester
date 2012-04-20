@@ -1,9 +1,22 @@
 <?php
+/**
+ * @package     Joomla.PullTester
+ * @subpackage  Table
+ *
+ * @copyright   Copyright (C) 2011 Open Source Matters, Inc. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
 
-jimport('joomla.database.table');
-
-class TablePulls extends JTable
+/**
+ * Joomla Pull Tester Pull Request table class.
+ *
+ * @package     Joomla.PullTester
+ * @subpackage  Table
+ * @since       1.0
+ */
+class PTTablePulls extends JTable
 {
+
 	/**
 	 * Constructor
 	 *
@@ -29,11 +42,9 @@ class TablePulls extends JTable
 	{
 		// Get the asset id for the asset.
 		$this->_db->setQuery(
-			'SELECT ' . $this->_db->quoteName('id') .
-			' FROM ' . $this->_db->quoteName('pulls') .
-			' WHERE ' . $this->_db->quoteName('pull_id') . ' = ' . (int)$number
-		);
-
+			'SELECT ' . $this->_db->quoteName('id') . ' FROM ' . $this->_db->quoteName('pulls') . ' WHERE ' . $this->_db->quoteName('pull_id') . ' = ' .
+				 (int) $number);
+		
 		$id = (int) $this->_db->loadResult();
 		if (empty($id))
 		{
@@ -51,46 +62,47 @@ class TablePulls extends JTable
 	public function update($pulls)
 	{
 		//-- @todo this seems ugly :P
+		
 
 		$activePulls = array();
-
+		
 		foreach ($pulls as $pull)
 		{
 			$activePulls[] = $pull->number;
 		}
-
+		
 		$query = $this->_db->getQuery(true);
-
+		
 		$query->from($this->_tbl);
 		$query->select('pull_id');
-
+		
 		$this->_db->setQuery($query);
-
+		
 		$entries = $this->_db->loadColumn();
-
+		
 		$query->clear();
-
+		
 		$query->delete($this->_tbl);
-
+		
 		foreach ($entries as $entry)
 		{
-			if(in_array($entry, $activePulls))
+			if (in_array($entry, $activePulls))
 			{
 				continue;
 			}
-
+			
 			//-- Delete the pull
 			$query->clear('where');
-
-			$query->where('pull_id='.$entry);
-
+			
+			$query->where('pull_id=' . $entry);
+			
 			$this->_db->setQuery($query);
 			$this->_db->query();
-
+			
 			//-- Let's also delete the html file -- @todo: move
-			if(file_exists(PATH_OUTPUT.'/'.$entry.'.html'))
+			if (file_exists(PATH_OUTPUT . '/' . $entry . '.html'))
 			{
-				unlink(PATH_OUTPUT.'/'.$entry.'.html');
+				unlink(PATH_OUTPUT . '/' . $entry . '.html');
 			}
 		}
 	}
@@ -102,10 +114,10 @@ class TablePulls extends JTable
 	 */
 	public function truncate()
 	{
-		$this->_db->setQuery('TRUNCATE TABLE '.$this->_tbl);
-
+		$this->_db->setQuery('TRUNCATE TABLE ' . $this->_tbl);
+		
 		$this->_db->query();
-
+		
 		return;
 	}
 }

@@ -1,8 +1,20 @@
 <?php
+/**
+ * @package     Joomla.PullTester
+ * @subpackage  Table
+ *
+ * @copyright   Copyright (C) 2011 Open Source Matters, Inc. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
 
-jimport('joomla.database.table');
-
-class TableCheckstyle extends JTable
+/**
+ * Joomla Pull Tester Checkstyle table class.
+ *
+ * @package     Joomla.PullTester
+ * @subpackage  Table
+ * @since       1.0
+ */
+class PTTableCheckstyle extends JTable
 {
 	/**
 	 * Constructor
