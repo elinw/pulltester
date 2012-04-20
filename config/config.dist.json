@@ -43,6 +43,7 @@
 
 	"log_path":"\/tmp\/joomla-pull-tester\/logs",
 	"tmp_path":"\/tmp\/joomla-pull-tester\/tmp",
+	"repo_path":"\/tmp\/joomla-pull-tester\/repos",
 
 	"cache_enabled":"0",
 	"cache_ttl":"30",
