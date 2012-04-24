@@ -37,6 +37,17 @@
 		"repo": "joomla-platform"
 	},
 
+	"phpcs":{
+		"standard": "build\/phpcs\/Joomla",
+		"paths": [
+			"libraries\/joomla", 
+			"libraries\/legacy", 
+			"libraries\/platform.php", 
+			"libraries\/loader.php", 
+			"libraries\/import.php"
+		]
+	},
+
 	"debug":"0",
 	"debug_lang":"0",
 	"error_reporting":"30719",
