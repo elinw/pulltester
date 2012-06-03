@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.PullTester
  * @subpackage  Object
@@ -8,19 +9,22 @@
  */
 
 /**
- * Pull Request test object for the Joomla Pull Request Tester Application.
+ * Checkstyle report object for the Joomla Pull Request Tester Application.
  *
  * @package     Joomla.PullTester
  * @subpackage  Object
  * @since       1.0
  */
-class PTObjectTest extends JObject
+class PTObjectCheckstyle extends JObject
 {
-	public $testId;
+
 	public $pullId;
-	public $revision;
-	public $testedTime;
-	public $headRevision;
-	public $baseRevision;
-	public $data;
+
+	public $testId;
+
+	public $errorCount;
+
+	public $warningCount;
+
+	public $data = array('errors' => array(), 'warnings' => array());
 }

@@ -15,7 +15,7 @@
  * @subpackage  Controller
  * @since       1.0
  */
-class PTControllerUpdate extends JControllerBase
+class PTControllerCommandUpdate extends JControllerBase
 {
 	/**
 	 * Method to execute the controller.
@@ -36,8 +36,10 @@ class PTControllerUpdate extends JControllerBase
 		$state->set('github.user', $this->app->get('github.user'));
 		$state->set('github.repo', $this->app->get('github.repo'));
 
+		$repoPath = $this->app->get('repo_path', sys_get_temp_dir());
+
 		// Build the repository path.
-		$state->set('repo', $this->app->get('repo_path') . '/' . $this->app->get('github.user') . '/' . $this->app->get('github.repo'));
+		$state->set('repo', $repoPath . '/' . $this->app->get('github.user') . '/' . $this->app->get('github.repo'));
 
 		// Add the PHPCS testing configuration values.
 		$state->set('phpcs.standard', $this->app->get('phpcs.standard'));

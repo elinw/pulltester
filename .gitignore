@@ -1,4 +1,5 @@
-/src/config.php
-/checkouts
-/src/db/*
-/dbs/*
+/.*
+/etc/config.json
+/etc/tester.db
+/src/lib
+/tmp

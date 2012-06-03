@@ -3,11 +3,11 @@
 	"db_host":"",
 	"db_user":"",
 	"db_pass":"",
-	"db_name":"pull-request-tester.db",
+	"db_name":"@etc/tester.db",
 	"db_prefix":"pt_",
 
 	"mail_transport":"mail",
-	"sendmail_path":"\/usr\/sbin\/sendmail",
+	"sendmail_path":"/usr/sbin/sendmail",
 
 	"smtp_auth":"0",
 	"smtp_secure":"none",
@@ -31,20 +31,20 @@
 	"app_identity":null,
 
 	"github":{
-		"api": "https:\/\/api.github.com",
-		"host": "https:\/\/github.com",
+		"api": "https://api.github.com",
+		"host": "https://github.com",
 		"user": "joomla",
 		"repo": "joomla-platform"
 	},
 
 	"phpcs":{
-		"standard": "build\/phpcs\/Joomla",
+		"standard": "Joomla",
 		"paths": [
-			"libraries\/joomla", 
-			"libraries\/legacy", 
-			"libraries\/platform.php", 
-			"libraries\/loader.php", 
-			"libraries\/import.php"
+			"libraries/joomla", 
+			"libraries/legacy", 
+			"libraries/platform.php", 
+			"libraries/loader.php", 
+			"libraries/import.php"
 		]
 	},
 
@@ -52,9 +52,9 @@
 	"debug_lang":"0",
 	"error_reporting":"30719",
 
-	"log_path":"\/tmp\/joomla-pull-tester\/logs",
-	"tmp_path":"\/tmp\/joomla-pull-tester\/tmp",
-	"repo_path":"\/tmp\/joomla-pull-tester\/repos",
+	"log_path":"",
+	"tmp_path":"",
+	"repo_path":"",
 
 	"cache_enabled":"0",
 	"cache_ttl":"30",

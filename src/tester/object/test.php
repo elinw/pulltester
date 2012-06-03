@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.PullTester
  * @subpackage  Object
@@ -8,19 +9,26 @@
  */
 
 /**
- * JUnit report object for the Joomla Pull Request Tester Application.
+ * Pull Request test object for the Joomla Pull Request Tester Application.
  *
  * @package     Joomla.PullTester
  * @subpackage  Object
  * @since       1.0
  */
-class PTObjectJunit extends JObject
+class PTObjectTest extends JObject
 {
-	public $pullId;
+
 	public $testId;
-	public $testCount;
-	public $assertionCount;
-	public $failureCount;
-	public $errorCount;
-	public $data = array('errors' => array(), 'failures' => array());
+
+	public $pullId;
+
+	public $revision;
+
+	public $testedTime;
+
+	public $headRevision;
+
+	public $baseRevision;
+
+	public $data;
 }

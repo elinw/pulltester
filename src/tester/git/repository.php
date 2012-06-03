@@ -34,13 +34,31 @@ class PTGitRepository
 		$this->_root = $root;
 	}
 
+	/**
+	 * Check if the repository exists.
+	 *
+	 * @return  boolean  True if the repository exists.
+	 *
+	 * @since   1.0
+	 */
 	public function exists()
 	{
 		// If we don't have a configuration file for the repository it doesn't exist.
 		return file_exists($this->_root . '/.git/config');
 	}
 
-	public function create($remote = 'git://github.com/joomla/joomla-platform.git')
+	/**
+	 * Clone a repository from a given remote.
+	 *
+	 * @param   string  $remote  The URI from which to clone the repository.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  InvalidArgumentException
+	 * @throws  RuntimeException
+	 */
+	public function create($remote = 'http://github.com/joomla/joomla-platform.git')
 	{
 		// Initialize variables.
 		$out = array();
@@ -66,6 +84,17 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Fetch updates from a repository remote.
+	 *
+	 * @param   string  $remote  The remote name from which to fetch changes.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  InvalidArgumentException
+	 * @throws  RuntimeException
+	 */
 	public function fetch($remote = 'origin')
 	{
 		// Initialize variables.
@@ -93,6 +122,16 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Merge a branch by name.
+	 *
+	 * @param   string  $branch  The name of the branch to merge.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	public function merge($branch = 'origin/master')
 	{
 		// Initialize variables.
@@ -114,6 +153,18 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Add a remote to the repository.
+	 *
+	 * @param   string  $name  The name of the remote to add.
+	 * @param   string  $url   The URI of the remote to add.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  InvalidArgumentException
+	 * @throws  RuntimeException
+	 */
 	public function remoteAdd($name = 'joomla', $url = 'git@github.com:joomla/joomla-platform.git')
 	{
 		// Initialize variables.
@@ -135,17 +186,40 @@ class PTGitRepository
 		// Validate the response.
 		if ($return !== 0)
 		{
-			throw new RuntimeException(sprintf('The remote %s could not be added from %s with code %d and message %s.', $name, $url, $return, implode("\n", $out)));
+			throw new RuntimeException(
+				sprintf('The remote %s could not be added from %s with code %d and message %s.', $name, $url, $return, implode("\n", $out))
+			);
 		}
 
 		return $this;
 	}
 
+	/**
+	 * Check if a remote exists for the repository by name.
+	 *
+	 * @param   string  $name  The remote name to check.
+	 *
+	 * @return  boolean  True if the remote exists.
+	 *
+	 * @since   1.0
+	 */
 	public function remoteExists($name = 'joomla')
 	{
 		return in_array($name, $this->_getRemotes());
 	}
 
+	/**
+	 * Set the remote URL for the repository by name.
+	 *
+	 * @param   string  $name  The name of the remote to change.
+	 * @param   string  $url   The URI of the remote to set.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  InvalidArgumentException
+	 * @throws  RuntimeException
+	 */
 	public function remoteSetUrl($name = 'joomla', $url = 'git@github.com:joomla/joomla-platform.git')
 	{
 		// Initialize variables.
@@ -167,12 +241,24 @@ class PTGitRepository
 		// Validate the response.
 		if ($return !== 0)
 		{
-			throw new RuntimeException(sprintf('Could not set the url %s for remote %s. Error code %d and message %s.', $url, $name, $return, implode("\n", $out)));
+			throw new RuntimeException(
+				sprintf('Could not set the url %s for remote %s. Error code %d and message %s.', $url, $name, $return, implode("\n", $out))
+			);
 		}
 
 		return $this;
 	}
 
+	/**
+	 * Remove a remote from the repository by name.
+	 *
+	 * @param   string  $name  The remote name to remove.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	public function remoteRemove($name = 'joomla')
 	{
 		// Initialize variables.
@@ -182,7 +268,7 @@ class PTGitRepository
 		// If the remote doesn't already exist we have nothing to do.
 		if (!in_array($name, $this->_getRemotes()))
 		{
-			return true;
+			return $this;
 		}
 
 		// Execute the command.
@@ -200,22 +286,26 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Check out a branch by name.
+	 *
+	 * @param   string  $name  The branch name to checkout.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	public function branchCheckout($name = 'staging')
 	{
 		// Initialize variables.
 		$out = array();
 		$return = null;
 
-		// Ensure that the branch already exists.
-		if (!in_array($name, $this->_getBranches()))
-		{
-			throw new InvalidArgumentException('The branch ' . $name . ' does not exist.');
-		}
-
 		// Execute the command.
 		$wd = getcwd();
 		chdir($this->_root);
-		exec('git checkout ' . escapeshellarg($name), $out, $return);
+		exec('git checkout -q ' . escapeshellarg($name), $out, $return);
 		chdir($wd);
 
 		// Validate the response.
@@ -227,6 +317,19 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Create a branch on the repository.
+	 *
+	 * @param   string  $name          The name for the new branch to create.
+	 * @param   string  $parent        The name of the branch from which we are creating.
+	 * @param   string  $parentRemote  The name of the remote from which we are creating [optional for a local branch].
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  InvalidArgumentException
+	 * @throws  RuntimeException
+	 */
 	public function branchCreate($name = 'staging', $parent = 'master', $parentRemote = null)
 	{
 		// Initialize variables.
@@ -262,11 +365,30 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Check if a local branch exists for the repository by name.
+	 *
+	 * @param   string  $name  The branch name to check.
+	 *
+	 * @return  boolean  True if the remote exists.
+	 *
+	 * @since   1.0
+	 */
 	public function branchExists($name = 'joomla')
 	{
 		return in_array($name, $this->_getBranches());
 	}
 
+	/**
+	 * Remove a branch from the repository.
+	 *
+	 * @param   string  $name  The branch name to remove.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	public function branchRemove($name = 'staging')
 	{
 		// Initialize variables.
@@ -276,7 +398,7 @@ class PTGitRepository
 		// If the branch doesn't already exist we have nothing to do.
 		if (!in_array($name, $this->_getBranches()))
 		{
-			return true;
+			return $this;
 		}
 
 		// Execute the command.
@@ -294,6 +416,14 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Clean the repository of untracked files and folders.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	public function clean()
 	{
 		// Initialize variables.
@@ -315,6 +445,16 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Reset the current repository branch.
+	 *
+	 * @param   boolean  $hard  True to perform a hard reset.
+	 *
+	 * @return  PackagerGitRepository  This repository object for chaining.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	public function reset($hard = true)
 	{
 		// Initialize variables.
@@ -338,6 +478,14 @@ class PTGitRepository
 		return $this;
 	}
 
+	/**
+	 * Get a list of the repository local branch names.
+	 *
+	 * @return  array
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	private function _getBranches()
 	{
 		// If we don't have a configuration file for the repository PANIC!
@@ -364,6 +512,14 @@ class PTGitRepository
 		return $branches;
 	}
 
+	/**
+	 * Get a list of the repository remote names.
+	 *
+	 * @return  array
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
 	private function _getRemotes()
 	{
 		// If we don't have a configuration file for the repository PANIC!

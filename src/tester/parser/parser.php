@@ -34,6 +34,15 @@ abstract class PTParser
 		$this->paths = $paths;
 	}
 
+	/**
+	 * Parse a report file.
+	 *
+	 * @param   string  $file  The absolute path for the file to parse.
+	 *
+	 * @return  mixed
+	 *
+	 * @since   1.0
+	 */
 	abstract public function parse($file);
 
 	/**

@@ -14,7 +14,7 @@
  * @subpackage  Controller
  * @since       1.0
  */
-class PTControllerInstall extends JControllerBase
+class PTControllerCommandInstall extends JControllerBase
 {
 	/**
 	 * Method to execute the controller.
@@ -33,12 +33,12 @@ class PTControllerInstall extends JControllerBase
 		switch ($db->name)
 		{
 			case 'sqlite':
-				$queries = JDatabaseDriver::splitSql(file_get_contents(dirname(JPATH_BASE) . '/database/schema/sqlite/pulltester.sql'));
+				$queries = JDatabaseDriver::splitSql(trim(file_get_contents(JPATH_CONFIGURATION . '/db/schema/sqlite/pulltester.sql')));
 				break;
 
 			case 'mysql':
 			case 'mysqli':
-				$queries = JDatabaseDriver::splitSql(file_get_contents(dirname(JPATH_BASE) . '/database/schema/mysql/pulltester.sql'));
+				$queries = JDatabaseDriver::splitSql(trim(file_get_contents(JPATH_CONFIGURATION . '/db/schema/mysql/pulltester.sql')));
 				break;
 
 			default:
@@ -46,10 +46,14 @@ class PTControllerInstall extends JControllerBase
 				break;
 		}
 
+		$this->app->out(sprintf('. Installing database tables using the configured %s database.', $db->name));
+
 		// Execute the installation schema queries.
 		foreach ($queries as $query)
 		{
-			$db->setQuery($query)->execute();
+			$db->setQuery(trim($query))->execute();
 		}
+
+		$this->app->out(sprintf('. Installation successful.', $db->name));
 	}
 }

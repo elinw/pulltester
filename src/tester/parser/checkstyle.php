@@ -41,7 +41,7 @@ class PTParserCheckstyle extends PTParser
 		// Create the report data object.
 		$report = new PTObjectCheckstyle;
 
-		$reader = new XMLReader();
+		$reader = new XMLReader;
 		$reader->open($file);
 		while ($reader->read())
 		{
@@ -54,7 +54,7 @@ class PTParserCheckstyle extends PTParser
 			{
 				if ($reader->getAttribute('severity') == 'warning')
 				{
-					$e = new stdClass();
+					$e = new stdClass;
 					$e->file = $fName;
 					$e->line = (int) $reader->getAttribute('line');
 					$e->message = $reader->getAttribute('message');
@@ -64,7 +64,7 @@ class PTParserCheckstyle extends PTParser
 
 				if ($reader->getAttribute('severity') == 'error')
 				{
-					$e = new stdClass();
+					$e = new stdClass;
 					$e->file = $fName;
 					$e->line = (int) $reader->getAttribute('line');
 					$e->message = $reader->getAttribute('message');

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.PullTester
  * @subpackage  Model
@@ -56,6 +57,41 @@ class PTModelRepository extends JModelDatabase
 		// Setup the GitHub API connector.
 		$this->github = new JGithub;
 		$this->github->setOption('api.url', $this->state->get('github.api'));
+		$this->github->setOption('curl.certpath', JPATH_CONFIGURATION . '/cacert.pem');
+	}
+
+	/**
+	 * Get a list of Pull Requests that need to be tested.
+	 *
+	 * @return  array
+	 *
+	 * @since   1.0
+	 */
+	public function getPullRequestsToTest()
+	{
+		// Initialize variables.
+		$pullRequests = array();
+
+		// Build the query to get the pull requests.
+		$query = $this->db->getQuery(true);
+		$query->select('r.pull_id, r.github_id, r.data');
+		$query->from('#__pull_requests AS r');
+		$query->leftJoin('#__pull_request_tests AS t ON r.pull_id = t.pull_id');
+		$query->where('r.state = 0');
+		$query->where('r.is_mergeable = 1');
+		$query->where('((t.tested_time IS NULL) OR (r.updated_time < t.tested_time))');
+
+		try
+		{
+			$this->db->setQuery($query);
+			$pullRequests = $this->db->loadObjectList();
+		}
+		catch (RuntimeException $e)
+		{
+			JLog::add('Error: ' . $e->getMessage(), JLog::DEBUG);
+		}
+
+		return $pullRequests;
 	}
 
 	/**
@@ -78,7 +114,9 @@ class PTModelRepository extends JModelDatabase
 		// Otherwise update from the origin staging branch.
 		else
 		{
-			$r->fetch('origin')->branchCheckout('master')->merge('origin/staging');
+			$r->fetch('origin')
+				->branchCheckout('master')
+				->merge('origin/staging');
 		}
 
 		// Clean things up.
@@ -95,7 +133,7 @@ class PTModelRepository extends JModelDatabase
 	public function syncMetadataWithGithub()
 	{
 		// Synchronize closed pull requests first.
-		$page  = 1;
+		$page = 1;
 		$pulls = $this->github->pulls->getList($this->state->get('github.user'), $this->state->get('github.repo'), 'closed', $page, 100);
 
 		// Paginate over closed pull requests until there aren't any more.
@@ -110,7 +148,7 @@ class PTModelRepository extends JModelDatabase
 		}
 
 		// Synchronize open pull requests first.
-		$page  = 1;
+		$page = 1;
 		$pulls = $this->github->pulls->getList($this->state->get('github.user'), $this->state->get('github.repo'), 'open', $page, 100);
 
 		// Paginate over open pull requests until there aren't any more.
@@ -125,6 +163,13 @@ class PTModelRepository extends JModelDatabase
 		}
 	}
 
+	/**
+	 * Execute PHP_CodeSniffer over the repository.
+	 *
+	 * @return  PTModelRepository
+	 *
+	 * @since   1.0
+	 */
 	protected function executePHPCS()
 	{
 		// Initialize variables.
@@ -135,8 +180,7 @@ class PTModelRepository extends JModelDatabase
 			'phpcs',
 			'--report=checkstyle',
 			'--report-file=' . $this->state->get('repo') . '/checkstyle.xml',
-			'--standard=' . $this->state->get('phpcs.standard', 'build/phpcs/Joomla')
-		);
+			'--standard=' . $this->state->get('phpcs.standard', 'build/phpcs/Joomla'));
 
 		// Add the PHPCS paths to the command.
 		$command = array_merge($command, (array) $this->state->get('phpcs.paths', array()));
@@ -198,8 +242,10 @@ class PTModelRepository extends JModelDatabase
 		// Build the insert query.
 		$this->queryInsert = $this->db->getQuery(true);
 		$this->queryInsert->insert('#__pull_requests');
-		$this->queryInsert->columns('github_id, title, state, is_mergeable, user, avatar_url, created_time, updated_time, closed_time, merged_time, data');
-		$this->queryInsert->values(':githubId, :title, :state, :isMergeable, :user, :avatarUrl, :createdTime, :updatedTime, :closedTime, :mergedTime, :data');
+		$this->queryInsert->columns(
+			'github_id, title, state, is_mergeable, user, avatar_url, created_time, updated_time, closed_time, merged_time, data');
+		$this->queryInsert->values(
+			':githubId, :title, :state, :isMergeable, :user, :avatarUrl, :createdTime, :updatedTime, :closedTime, :mergedTime, :data');
 
 		return $this->queryInsert;
 	}
@@ -213,22 +259,25 @@ class PTModelRepository extends JModelDatabase
 	 */
 	protected function fetchUpdateQuery()
 	{
-		// Only create the query if it doesn't exist.
-		if (isset($this->queryUpdate))
-		{
-			return $this->queryUpdate;
-		}
-
 		// Build the update query.
-		$this->queryUpdate = $this->db->getQuery(true);
-		$this->queryUpdate->update('#__pull_requests');
-		$this->queryUpdate->columns('title, state, is_mergeable, updated_time, closed_time, merged_time, data');
-		$this->queryUpdate->values(':title, :state, :isMergeable, :updatedTime, :closedTime, :mergedTime, :data');
-		$this->queryUpdate->where('github_id = :githubId');
+		$queryUpdate = $this->db->getQuery(true);
+		$queryUpdate->update('#__pull_requests');
+		$queryUpdate->columns('title, state, is_mergeable, updated_time, closed_time, merged_time, data');
+		$queryUpdate->values(':title, :state, :isMergeable, :updatedTime, :closedTime, :mergedTime, :data');
+		$queryUpdate->where('github_id = :githubId');
 
-		return $this->queryUpdate;
+		return $queryUpdate;
 	}
 
+	/**
+	 * Update the pull request information.
+	 *
+	 * @param   array  $pulls  The list of pull requests to update.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
 	protected function processPullRequests($pulls)
 	{
 		// Get the list of existing pull requests in our database.
@@ -238,10 +287,10 @@ class PTModelRepository extends JModelDatabase
 		foreach ($pulls as $pull)
 		{
 			// First we need to get a date object for the last updated timestamp.
-			$updated = JFactory::getDate($pull->updated_at);
+			$updated = new JDate($pull->updated_at);
 
 			// If either the pull request doesn't exist in our list or the last updated timestamp is different we need to update our database.
-			if (empty($current[$pull->number]) || JFactory::getDate($current[$pull->number]['updated_time']) != $updated)
+			if (empty($current[$pull->number]) || new JDate($current[$pull->number]['updated_time']) != $updated)
 			{
 				// Get the full pull request object from GitHub.
 				$pull = $this->github->pulls->get($this->state->get('github.user'), $this->state->get('github.repo'), $pull->number);
@@ -261,13 +310,33 @@ class PTModelRepository extends JModelDatabase
 					$insert->bind('isMergeable', $mergeable, PDO::PARAM_INT);
 					$insert->bind('user', $pull->user->login);
 					$insert->bind('avatarUrl', $pull->user->avatar_url);
-					$createdTime = JFactory::getDate($pull->created_at)->toISO8601();
+					$created = new JDate($pull->created_at);
+					$createdTime = $created->toISO8601();
 					$insert->bind('createdTime', $createdTime);
-					$updatedTime = JFactory::getDate($pull->updated_at)->toISO8601();
+					$updated = new JDate($pull->updated_at);
+					$updatedTime = $updated->toISO8601();
 					$insert->bind('updatedTime', $updatedTime);
-					$closedTime = ($pull->closed_at ? JFactory::getDate($pull->closed_at)->toISO8601() : '');
+
+					if ($pull->closed_at)
+					{
+						$closed = new JDate($pull->closed_at);
+						$closedTime = $closed->toISO8601();
+					}
+					else
+					{
+						$closedTime = '';
+					}
 					$insert->bind('closedTime', $closedTime);
-					$mergedTime = ($pull->merged_at ? JFactory::getDate($pull->merged_at)->toISO8601() : '');
+
+					if ($pull->merged_at)
+					{
+						$merged = new JDate($pull->merged_at);
+						$mergedTime = $merged->toISO8601();
+					}
+					else
+					{
+						$mergedTime = '';
+					}
 					$insert->bind('mergedTime', $mergedTime);
 					$data = json_encode($pull);
 					$insert->bind('data', $data);
@@ -288,11 +357,30 @@ class PTModelRepository extends JModelDatabase
 					$update->bind('state', $state, PDO::PARAM_INT);
 					$mergeable = ($pull->mergeable ? 1 : 0);
 					$update->bind('isMergeable', $mergeable, PDO::PARAM_INT);
-					$updatedTime = JFactory::getDate($pull->updated_at)->toISO8601();
+					$updated = new JDate($pull->updated_at);
+					$updatedTime = $updated->toISO8601();
 					$update->bind('updatedTime', $updatedTime);
-					$closedTime = ($pull->closed_at ? JFactory::getDate($pull->closed_at)->toISO8601() : '');
+
+					if ($pull->closed_at)
+					{
+						$closed = new JDate($pull->closed_at);
+						$closedTime = $closed->toISO8601();
+					}
+					else
+					{
+						$closedTime = '';
+					}
 					$update->bind('closedTime', $closedTime);
-					$mergedTime = ($pull->merged_at ? JFactory::getDate($pull->merged_at)->toISO8601() : '');
+
+					if ($pull->merged_at)
+					{
+						$merged = new JDate($pull->merged_at);
+						$mergedTime = $merged->toISO8601();
+					}
+					else
+					{
+						$mergedTime = '';
+					}
 					$update->bind('mergedTime', $mergedTime);
 					$data = json_encode($pull);
 					$update->bind('data', $data);
@@ -304,11 +392,10 @@ class PTModelRepository extends JModelDatabase
 				try
 				{
 					$this->db->execute();
-
 				}
 				catch (RuntimeException $e)
 				{
-					JLog::add('Unable to ' . (empty($current[$pull->number]) ? 'add': 'update') . ' pull request: ' . $pull->number, JLog::DEBUG);
+					JLog::add('Unable to ' . (empty($current[$pull->number]) ? 'add' : 'update') . ' pull request: ' . $pull->number, JLog::DEBUG);
 					JLog::add('Error: ' . $e->getMessage(), JLog::DEBUG);
 				}
 			}

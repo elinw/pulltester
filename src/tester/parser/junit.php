@@ -50,7 +50,7 @@ class PTParserJunit extends PTParser
 		}
 		unset($xml);
 
-		$reader = new XMLReader();
+		$reader = new XMLReader;
 		$reader->open($file);
 
 		while ($reader->read() && $reader->name !== 'testsuite');
