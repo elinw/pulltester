@@ -1,6 +1,6 @@
 <?php
 /**
- * Distribution bootstrap file for the Joomla Pull Request Tester application.
+ * Distribution Web entry file for the Joomla Pull Request Tester application.
  *
  * @package    Joomla.PullTester
  *
@@ -8,19 +8,52 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-// Bootstrap the application.
-$path = getenv('PT_HOME');
-if ($path)
-{
-	require_once $path . '/bootstrap.php';
-}
-else
-{
-	require_once dirname(__DIR__) . '/code/bootstrap.php';
-}
+// Get some paths from the environment or standard locations.
+$tester = getenv('PT_HOME') ?: '/usr/local/joomla/pulltester';
+$joomla = getenv('JOOMLA_HOME') ?: '/usr/local/joomla';
 
+// Wrap the execution in a try statement to catch any exceptions thrown anywhere in the script.
 try
 {
+	// Look for the Joomla Platform in the production installed location.
+	if (file_exists($joomla . '/lib/platform.phar'))
+	{
+		require_once $joomla . '/lib/platform.phar';
+	}
+	// Development location.
+	elseif (file_exists(dirname(__DIR__) . '/lib/platform.phar'))
+	{
+		require_once dirname(__DIR__) . '/lib/platform.phar';
+	}
+	// Panic.
+	else
+	{
+		throw new RuntimeException('Unable to detect Joomla Platform path.', 500);
+	}
+
+	// Look for the application classes in the production installed location.
+	if (file_exists($tester . '/pulltester/web.phar'))
+	{
+		require_once $tester . '/pulltester/web.phar';
+	}
+	// Development location.
+	elseif (file_exists(dirname(realpath(__DIR__)) . '/src/main.php'))
+	{
+		JLoader::registerPrefix('PT', dirname(realpath(__DIR__)) . '/src/tester');
+		define('JPATH_SITE', dirname(realpath(__DIR__)) . '/src');
+	}
+	// Panic.
+	else
+	{
+		throw new RuntimeException('Unable to detect Joomla Pull Tester path.', 500);
+	}
+
+	// Define the application base path as the current directory.
+	define('JPATH_BASE', __DIR__);
+
+	// Set error handler to echo.
+	JLog::addLogger(array('logger' => 'echo'), JLog::ALL);
+
 	// Instantiate the application.
 	$application = JApplicationWeb::getInstance('PTApplicationWeb');
 
@@ -28,10 +61,7 @@ try
 	JFactory::$application = $application;
 
 	// Execute the application.
-	$application->loadSession()
-		->loadDatabase()
-		->loadIdentity()
-		->execute();
+	$application->loadDatabase()->execute();
 }
 catch (Exception $e)
 {

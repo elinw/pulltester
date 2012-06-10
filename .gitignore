@@ -3,3 +3,5 @@
 /etc/tester.db
 /src/lib
 /tmp
+/www/.htaccess
+/www/index.php

@@ -8,7 +8,8 @@
  */
 
 // Bootstrap the Joomla Platform.
-require_once __DIR__ . '/lib/platform.phar';
+//require_once __DIR__ . '/lib/platform.phar';
+require_once dirname(dirname(__DIR__)) . '/sandbox/libraries/import.php';
 
 // Register the application classes with the loader.
 JLoader::registerPrefix('PT', __DIR__ . '/tester');

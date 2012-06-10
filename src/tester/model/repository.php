@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package     Joomla.PullTester
  * @subpackage  Model
@@ -67,7 +66,7 @@ class PTModelRepository extends JModelDatabase
 	 *
 	 * @since   1.0
 	 */
-	public function getPullRequestsToTest()
+	public function getPullRequestsToTest($mergeable = false)
 	{
 		// Initialize variables.
 		$pullRequests = array();
@@ -78,8 +77,12 @@ class PTModelRepository extends JModelDatabase
 		$query->from('#__pull_requests AS r');
 		$query->leftJoin('#__pull_request_tests AS t ON r.pull_id = t.pull_id');
 		$query->where('r.state = 0');
-		$query->where('r.is_mergeable = 1');
+		if ($mergeable)
+		{
+			$query->where('r.is_mergeable = 1');
+		}
 		$query->where('((t.tested_time IS NULL) OR (r.updated_time < t.tested_time))');
+		$query->order('updated_time DESC');
 
 		try
 		{
@@ -257,14 +260,21 @@ class PTModelRepository extends JModelDatabase
 	 *
 	 * @since   1.0
 	 */
-	protected function fetchUpdateQuery()
+	protected function fetchUpdateQuery($title, $state, $isMergeable, $updatedTime, $closedTime, $mergedTime, $data, $githubId)
 	{
 		// Build the update query.
 		$queryUpdate = $this->db->getQuery(true);
 		$queryUpdate->update('#__pull_requests');
-		$queryUpdate->columns('title, state, is_mergeable, updated_time, closed_time, merged_time, data');
-		$queryUpdate->values(':title, :state, :isMergeable, :updatedTime, :closedTime, :mergedTime, :data');
-		$queryUpdate->where('github_id = :githubId');
+
+		$queryUpdate->set('title=' . $queryUpdate->q($title));
+		$queryUpdate->set('state=' . (int) $state);
+		$queryUpdate->set('is_mergeable=' . (int) $isMergeable);
+		$queryUpdate->set('updated_time=' . $queryUpdate->q($updatedTime));
+		$queryUpdate->set('closed_time=' . $queryUpdate->q($closedTime));
+		$queryUpdate->set('merged_time=' . $queryUpdate->q($mergedTime));
+		$queryUpdate->set('data=' . $queryUpdate->q($data));
+
+		$queryUpdate->where('github_id=' . (int) $githubId);
 
 		return $queryUpdate;
 	}
@@ -347,19 +357,8 @@ class PTModelRepository extends JModelDatabase
 				// Otherwise we simply need to update the data in our database for the pull request.
 				else
 				{
-					// Get a query object for updating the pull request in our database.
-					$update = $this->fetchUpdateQuery();
-
-					// Bind the values to our query.
-					$update->bind('githubId', $pull->number, PDO::PARAM_INT);
-					$update->bind('title', $pull->title);
-					$state = ($pull->state == 'open' ? 0 : 1);
-					$update->bind('state', $state, PDO::PARAM_INT);
-					$mergeable = ($pull->mergeable ? 1 : 0);
-					$update->bind('isMergeable', $mergeable, PDO::PARAM_INT);
 					$updated = new JDate($pull->updated_at);
 					$updatedTime = $updated->toISO8601();
-					$update->bind('updatedTime', $updatedTime);
 
 					if ($pull->closed_at)
 					{
@@ -370,7 +369,6 @@ class PTModelRepository extends JModelDatabase
 					{
 						$closedTime = '';
 					}
-					$update->bind('closedTime', $closedTime);
 
 					if ($pull->merged_at)
 					{
@@ -381,9 +379,18 @@ class PTModelRepository extends JModelDatabase
 					{
 						$mergedTime = '';
 					}
-					$update->bind('mergedTime', $mergedTime);
-					$data = json_encode($pull);
-					$update->bind('data', $data);
+
+					// Get a query object for updating the pull request in our database.
+					$update = $this->fetchUpdateQuery(
+						$pull->title,
+						($pull->state == 'open' ? 0 : 1),
+						($pull->mergeable ? 1 : 0),
+						$updatedTime,
+						$closedTime,
+						$mergedTime,
+						json_encode($pull),
+						$pull->number
+					);
 
 					// Set the query for execution by our driver.
 					$this->db->setQuery($update);
