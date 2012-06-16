@@ -1,100 +1,114 @@
 <?php
 /**
- * @package     Joomla.PullTester
+ * @package     Joomla.Platform
  * @subpackage  Theme
  *
- * @copyright   Copyright (C) 2011 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE
  */
 
+defined('JPATH_PLATFORM') or die;
+
 /**
- * Joomla Pull Request Tester Theme
+ * Joomla Platform Theme Class
  *
- * @package     Joomla.PullTester
+ * @package     Joomla.Platform
  * @subpackage  Theme
  * @since       1.0
  */
-class PTTheme extends JViewHtml
+class PTTheme
 {
 	/**
-	 * The view layout.
+	 * The theme buffer.
 	 *
-	 * @var    string
-	 * @since  12.1
+	 * @var    JRegistry
+	 * @since  1.0
 	 */
-	protected $layout = 'theme';
+	public $buffer;
 
 	/**
-	 * Method to get the layout path.
+	 * The theme options.
 	 *
-	 * @param   string  $layout  The layout name.
-	 *
-	 * @return  mixed  The layout file name if found, false otherwise.
-	 *
-	 * @since   12.1
+	 * @var    JRegistry
+	 * @since  1.0
 	 */
-	public function getPath($layout)
-	{
-		// Get the layout file name.
-		$file = JPath::clean($layout . '.php');
-
-			// Start looping through the path set
-		foreach ($this->paths as $path)
-		{
-			// Get the path to the file
-			$fullname = $path . '/' . $file;
-
-			// Get the file path.
-			if (file_exists($fullname) && substr($fullname, 0, strlen($path)) == $path)
-			{
-				return $fullname;
-			}
-		}
-	}
+	public $options;
 
 	/**
-	 * Method to render the view.
+	 * The theme renderer.
 	 *
-	 * @return  string  The rendered view.
+	 * @var    PTThemeRenderer
+	 * @since  1.0
+	 */
+	public $renderer;
+
+	/**
+	 * Instantiate the theme.
 	 *
-	 * @since   12.1
+	 * @param   JRegistry        $buffer    The theme buffer.
+	 * @param   JRegistry        $options   The theme options.
+	 * @param   PTThemeRenderer  $renderer  The theme renderer.
+	 *
+	 * @since   1.0
 	 * @throws  RuntimeException
 	 */
-	public function render()
+	public function __construct(JRegistry $buffer = null, JRegistry $options = null, PTThemeRenderer $renderer = null)
 	{
-		// Get the layout path.
-		$path = $this->getPath($this->getLayout());
-
-		// Check if the layout path was found.
-		if (!$path)
-		{
-			throw new RuntimeException('Layout Path Not Found');
-		}
-
-		// Start an output buffer.
-		ob_start();
-
-		// Load the layout.
-		include $path;
-
-		// Get the layout contents.
-		$output = ob_get_clean();
-
-		return $output;
+		// Setup dependencies.
+		$this->buffer = isset($buffer) ? $buffer : $this->loadBuffer();
+		$this->options = isset($options) ? $options : $this->loadOptions();
+		$this->renderer = isset($renderer) ? $renderer : $this->loadRenderer();
 	}
 
 	/**
-	 * Method to load the paths queue.
+	 * Render the theme.
 	 *
-	 * @return  SplPriorityQueue  The paths queue.
+	 * @param   string  $path  The path to the theme.
 	 *
-	 * @since   12.1
+	 * @return  string  The rendered theme.
+	 *
+	 * @since   1.0
 	 */
-	protected function loadPaths()
+	public function render($path)
 	{
-		$paths = new SplPriorityQueue;
-		$paths->insert(JPATH_SITE . '/html', 100);
+		// Render the theme.
+		return $this->renderer->render($path);
+	}
 
-		return $paths;
+	/**
+	 * Load the theme buffer.
+	 *
+	 * @return  JRegistry  The theme buffer.
+	 *
+	 * @since   1.0
+	 */
+	protected function loadBuffer()
+	{
+		return new JRegistry;
+	}
+
+	/**
+	 * Load the theme options.
+	 *
+	 * @return  JRegistry  The theme options.
+	 *
+	 * @since   1.0
+	 */
+	protected function loadOptions()
+	{
+		return new JRegistry;
+	}
+
+	/**
+	 * Load a theme renderer.
+	 *
+	 * @return  PTThemeRenderer  The theme renderer.
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
+	protected function loadRenderer()
+	{
+		return PTThemeRenderer::getInstance('Php', $this);
 	}
 }
