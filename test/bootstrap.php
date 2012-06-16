@@ -1,19 +1,10 @@
 <?php
 /**
- * @package     Joomla.PullTester
- * @subpackage  Tests
+ * @package    Joomla.PullTester
  *
- * @copyright   Copyright (C) 2011 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE
+ * @copyright  Copyright (C) 2012 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE
  */
-
-// Fix magic quotes.
-@ini_set('magic_quotes_runtime', 0);
-
-// Maximise error reporting.
-@ini_set('zend.ze1_compatibility_mode', '0');
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 /*
  * Ensure that required path constants are defined.  These can be overriden within the phpunit.xml file
@@ -24,8 +15,8 @@ if (!defined('JPATH_TESTS'))
 	define('JPATH_TESTS', realpath(__DIR__));
 }
 
-// Bootstrap the platform and application libraries.
-require_once __DIR__ . '/../code/bootstrap.php';
+// Import the Joomla Platform and testing classes.
+require_once __DIR__ . '/joomla-test.phar';
 
-// Register the core Joomla test classes.
-JLoader::registerPrefix('Test', JPATH_PLATFORM . '/../tests/core');
+// Import the application loader.
+require_once __DIR__ . '/../src/import.php';
