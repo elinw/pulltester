@@ -19,15 +19,16 @@ class PTParserJunit extends PTParser
 	/**
 	 * Parse a JUnit XML report into a value object.
 	 *
-	 * @param   string  $file  The filesystem path of the JUnit report to parse.
+	 * @param   PTTestReportUnittest  $report  The report on which to bind parsed data.
+	 * @param   string                $file    The filesystem path of the JUnit report to parse.
 	 *
-	 * @return  PTObjectJunit
+	 * @return  PTTestReportUnittest
 	 *
 	 * @see     PTParser::parse()
 	 * @since   1.0
 	 * @throws  RuntimeException
 	 */
-	public function parse($file)
+	public function parse($report, $file)
 	{
 		// Verify that the report file exists.
 		if (!file_exists($file) || filesize($file) < 1)
@@ -37,9 +38,6 @@ class PTParserJunit extends PTParser
 
 		// Clean all the paths in the file.
 		file_put_contents($file, $this->cleanPaths(file_get_contents($file)));
-
-		// Create the report data object.
-		$report = new PTObjectJunit;
 
 		// I'm not sure if this is really necessary, but it appears to validate the full XML document using SimpleXML.
 		libxml_use_internal_errors(true);
@@ -56,11 +54,11 @@ class PTParserJunit extends PTParser
 		while ($reader->read() && $reader->name !== 'testsuite');
 
 		// Set some report aggregate data.
-		$report->testCount 		= $reader->getAttribute('tests');
-		$report->assertionCount	= $reader->getAttribute('assertions');
-		$report->failureCount 	= $reader->getAttribute('failures');
-		$report->errorCount 	= $reader->getAttribute('errors');
-		$report->elapsedTime 	= $reader->getAttribute('time');
+		$report->test_count 		+= $reader->getAttribute('tests');
+		$report->assertion_count	+= $reader->getAttribute('assertions');
+		$report->failure_count 		+= $reader->getAttribute('failures');
+		$report->error_count 		+= $reader->getAttribute('errors');
+		$report->elapsed_time 		+= $reader->getAttribute('time');
 
 		while ($reader->read())
 		{
@@ -70,7 +68,7 @@ class PTParserJunit extends PTParser
 
 				if ($s)
 				{
-					$report->data['errors'][] = $this->cleanPaths($s);
+					$report->data->errors[] = $this->cleanPaths($s);
 				}
 			}
 
@@ -80,7 +78,7 @@ class PTParserJunit extends PTParser
 
 				if ($s)
 				{
-					$report->data['failures'][] = $this->cleanPaths($s);
+					$report->data->failures[] = $this->cleanPaths($s);
 				}
 			}
 		}

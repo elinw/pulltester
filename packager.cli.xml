@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<packager minify="true" alias="tester.phar" destination="build/tester.phar">
+	<code stub="src/stub.cli.php">
+		<folder recursive="true" localPath="tester">src/tester</folder>
+
+		<platform version="12.1" legacy="false" localPath="lib">
+			<packages>
+			</packages>
+		</platform>
+	</code>	
+
+	<metadata>
+		<element name="version" value="1.0" />
+		<element name="authors">
+			<element name="Open Source Matters, Inc.">
+				<element name="email" value="admin@joomla.org" />
+			</element>
+		</element>
+	</metadata>
+</packager>

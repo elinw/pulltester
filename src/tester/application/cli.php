@@ -36,17 +36,17 @@ class PTApplicationCli extends JApplicationCli
 		// There are a few different paths to the help controller.
 		if ($this->input->get('h') || $this->input->get('help') || empty($this->input->args[0]))
 		{
-			$controllerName = 'PTControllerCommandHelp';
+			$controllerName = 'PTCommandHelp';
 		}
 		// Look at the first non-switch non-variable argument as the command.
 		else
 		{
 			$command = strtolower(filter_var($this->input->args[0], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW));
-			$controllerName = 'PTControllerCommand' . ucfirst($command);
+			$controllerName = 'PTCommand' . ucfirst($command);
 		}
 
 		// Nothing found. Panic.
-		if (!class_exists($controllerName))
+		if (!class_exists($controllerName) || !is_subclass_of($controllerName, 'JController'))
 		{
 			throw new InvalidArgumentException(sprintf('The %s command is not supported.', $command));
 		}

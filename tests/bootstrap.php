@@ -18,5 +18,5 @@ if (!defined('JPATH_TESTS'))
 // Import the Joomla Platform and testing classes.
 require_once __DIR__ . '/joomla-test.phar';
 
-// Import the application loader.
-require_once __DIR__ . '/../src/import.php';
+// Register the application classes with the loader.
+JLoader::registerPrefix('PT', __DIR__ . '/../src/tester');

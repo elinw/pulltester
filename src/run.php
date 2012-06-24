@@ -7,14 +7,14 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
+define('JPATH_BASE', dirname(__DIR__));
+
 // Bootstrap the Joomla Platform.
-//require_once __DIR__ . '/lib/platform.phar';
-require_once dirname(dirname(__DIR__)) . '/sandbox/libraries/import.php';
+require_once JPATH_BASE . '/lib/joomla.phar';
 
 // Register the application classes with the loader.
 JLoader::registerPrefix('PT', __DIR__ . '/tester');
 
-define('JPATH_BASE', dirname(__DIR__));
 
 // Wrap the execution in a try statement to catch any exceptions thrown anywhere in the script.
 try

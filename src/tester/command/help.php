@@ -14,7 +14,7 @@
  * @subpackage  Controller
  * @since       1.0
  */
-class PTControllerCommandHelp extends JControllerBase
+class PTCommandHelp extends JControllerBase
 {
 	/**
 	 * Method to execute the controller.
@@ -33,6 +33,7 @@ class PTControllerCommandHelp extends JControllerBase
 		$this->app->out('  -h | --help   Prints this usage information.');
 		$this->app->out();
 		$this->app->out('Examples: pull-tester install');
+		$this->app->out('          pull-tester test');
 		$this->app->out('          pull-tester update');
 		$this->app->out();
 	}

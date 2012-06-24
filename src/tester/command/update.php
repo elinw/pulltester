@@ -15,7 +15,7 @@
  * @subpackage  Controller
  * @since       1.0
  */
-class PTControllerCommandUpdate extends JControllerBase
+class PTCommandUpdate extends JControllerBase
 {
 	/**
 	 * Method to execute the controller.
@@ -46,12 +46,12 @@ class PTControllerCommandUpdate extends JControllerBase
 		$state->set('phpcs.paths', $this->app->get('phpcs.paths'));
 
 		// Get the repository model.
-		$model = new PTModelRepository($state);
+		$model = new PTRepository($state);
 
 		// Sync the local database with the GitHub metadata.
-		$model->syncMetadataWithGithub();
+		$model->syncRequests($this->input->getBool('f', false));
 
-		// Sync the local repository with the GitHub repository.
-		$model->syncCodeWithGithub();
+		// Test the master repository.
+		$model->testMaster();
 	}
 }

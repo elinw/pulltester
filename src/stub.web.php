@@ -18,4 +18,7 @@ if (!class_exists('JLoader'))
 // Register the application classes with the loader.
 JLoader::registerPrefix('PT', 'phar://' . __FILE__ . '/tester');
 
+// Set the site path constant.
+define('JPATH_SITE', 'phar://' . __FILE__);
+
 __HALT_COMPILER();?>

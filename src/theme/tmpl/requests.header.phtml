@@ -1,0 +1,31 @@
+<?php
+/**
+ * Requests page header template.
+ *
+ * @package    Joomla.PullTester
+ *
+ * @copyright  Copyright (C) 2012 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE
+ */
+
+$filterState = $this->model->getState()->get('list.filter.state');
+$filterMergeable = $this->model->getState()->get('list.filter.mergeable');
+?>
+<!-- List filter controls. -->
+<form class="form-horizontal" action="/" method="POST">
+
+	<div class="btn-group pull-right" data-toggle="buttons-checkbox">
+		<label class="btn<?php echo ($filterMergeable === '1') ? ' active' : ''; ?>">
+			<input style="display: none;" type="checkbox" name="list_mergeable" value="1" onchange="this.form.submit();">Mergeable Only</label>
+	</div>
+
+	<div class="btn-group pull-right" data-toggle="buttons-radio">
+		<label class="btn<?php echo ($filterState === '0') ? ' active' : ''; ?>">
+			<input style="display: none;" type="radio" name="list_state" value="0" onchange="this.form.submit();">Open</label>
+		<label class="btn<?php echo ($filterState === '1') ? ' active' : ''; ?>">
+			<input style="display: none;" type="radio" name="list_state" value="1" onchange="this.form.submit();">Closed</label>
+	</div>
+</form>
+
+<!-- Main Heading. -->
+<h1>Pull Requests</h1>

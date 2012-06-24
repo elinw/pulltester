@@ -37,7 +37,7 @@ try
 		require_once $tester . '/pulltester/web.phar';
 	}
 	// Development location.
-	elseif (file_exists(dirname(realpath(__DIR__)) . '/src/main.php'))
+	elseif (file_exists(dirname(realpath(__DIR__)) . '/src/run.php'))
 	{
 		JLoader::registerPrefix('PT', dirname(realpath(__DIR__)) . '/src/tester');
 		define('JPATH_SITE', dirname(realpath(__DIR__)) . '/src');
@@ -61,7 +61,7 @@ try
 	JFactory::$application = $application;
 
 	// Execute the application.
-	$application->loadDatabase()->execute();
+	$application->loadDatabase()->loadSession()->loadTheme()->execute();
 }
 catch (Exception $e)
 {

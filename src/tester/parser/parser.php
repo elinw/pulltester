@@ -37,13 +37,14 @@ abstract class PTParser
 	/**
 	 * Parse a report file.
 	 *
-	 * @param   string  $file  The absolute path for the file to parse.
+	 * @param   object  $report  The report on which to bind parsed data.
+	 * @param   string  $file    The absolute path for the file to parse.
 	 *
 	 * @return  mixed
 	 *
 	 * @since   1.0
 	 */
-	abstract public function parse($file);
+	abstract public function parse($report, $file);
 
 	/**
 	 * Method to clean base paths from a string.

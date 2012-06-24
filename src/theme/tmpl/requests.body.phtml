@@ -1,0 +1,139 @@
+<?php
+/**
+ * Requests page header template.
+ *
+ * @package    Joomla.PullTester
+ *
+ * @copyright  Copyright (C) 2012 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE
+ */
+?>
+	<p>Dapibus dapibus nunc phasellus dolor, aliquam augue mattis et sed tortor turpis? Phasellus elit ultricies, urna porttitor nunc eros egestas dis mus vut nunc, dolor ultricies ac urna turpis magna, sed. Auctor? Natoque a, sagittis, lectus. Elementum dapibus, sed, natoque? Ac lorem? Nisi a in etiam nec diam? Velit, elit! Facilisis egestas? </p>
+	<div class="row">
+		<div class="span12">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Request</th>
+						<th>Author</th>
+						<th>Title</th>
+						<th width="15%">State</th>
+						<th width="15%">Last Updated</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach($this->model->getRequests() as $request) : $body = substr(strip_tags($request->data->body), 0, 250); $request->tested_data = json_decode($request->tested_data); ?>
+					<tr>
+						<td>
+							<a href="<?php echo $request->data->html_url; ?>">
+								<?php echo $request->github_id; ?></a>
+						</td>
+						<td>
+							<a href="https://github.com/<?php echo $request->user; ?>">
+								<img src="https://secure.gravatar.com/avatar/<?php echo $request->data->user->gravatar_id; ?>?s=80&d=mm" class="thumbnail" alt="" />
+								<?php echo $request->user; ?></a>
+						</td>
+						<td>
+							<h4><?php echo $request->title; ?></h4>
+							<p><?php echo (strlen($request->data->body) > 250) ? $body . '...' : $body; ?></p>
+							<p>
+								<?php if (isset($request->tested_data->checkstyle) && $request->tested_data->checkstyle === false): ?>
+									<span class="btn btn-mini btn-danger"><i class="icon-warning-sign icon-white"></i> Unable to Run Checkstyle</span>
+								<?php else: ?>
+									<?php if ($request->style_warnings) : ?>
+									<span class="btn btn-mini btn-warning"><i><?php echo $request->style_warnings; ?></i> Style Warnings</span>
+									<?php else: ?>
+									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Test Warnings</span>
+									<?php endif; ?>
+									<?php if ($request->style_errors) : ?>
+									<span class="btn btn-mini btn-danger"><i><?php echo $request->style_errors; ?></i> Style Errors</span>
+									<?php else: ?>
+									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Style Errors</span>
+									<?php endif; ?>
+								<?php endif; ?>
+								<?php if (isset($request->tested_data->unit) && $request->tested_data->unit == false): ?>
+									<span class="btn btn-mini btn-danger"><i class="icon-warning-sign icon-white"></i> Unable to Run Unit Tests</span>
+								<?php elseif (isset($request->tested_data->unit_legacy) && $request->tested_data->unit_legacy == false): ?>
+									<span class="btn btn-mini btn-danger"><i class="icon-warning-sign icon-white"></i> Unable to Run Legacy Unit Tests</span>
+								<?php else: ?>
+								<?php if ($request->test_errors) : ?>
+									<span class="btn btn-mini btn-danger"><i><?php echo $request->test_errors; ?></i> Test Errors</span>
+									<?php else: ?>
+									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Test Errors</span>
+									<?php endif; ?>
+									<?php if ($request->test_failures) : ?>
+									<span class="btn btn-mini btn-danger"><i><?php echo $request->test_failures; ?></i> Test Failures</span>
+									<?php else: ?>
+									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Test Failures</span>
+									<?php endif; ?>
+								<?php endif; ?>
+							</p>
+								<?php if ($request->style_warnings) : ?>
+								<div class="new_style_warnings">
+									<hr />
+									<?php $data = json_decode($request->style_data); foreach ($data->new_warnings as $warning): ?>
+									<blockquote>
+										<p><?php echo $warning->message; ?>.</p>
+										<small><?php echo $warning->file; ?> : <span><?php echo $warning->line; ?></span></small>
+									</blockquote>
+									<?php endforeach; ?>
+								</div>
+								<?php endif; ?>
+								<?php if ($request->style_errors) : ?>
+								<div class="new_style_errors">
+									<hr />
+									<?php $data = json_decode($request->style_data); foreach ($data->new_errors as $error): ?>
+									<blockquote>
+										<p><?php echo $error->message; ?>.</p>
+										<small><?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></small>
+									</blockquote>
+									<?php endforeach; ?>
+								</div>
+								<?php endif; ?>
+								<?php if ($request->test_errors) : ?>
+								<div class="new_test_errors">
+									<hr />
+									<?php $data = json_decode($request->test_data); foreach ($data->errors as $error): ?>
+									<pre class="pre-scrollable"><?php echo $this->escape($error); ?></pre>
+									<?php endforeach; ?>
+								</div>
+								<?php endif; ?>
+								<?php if ($request->test_failures) : ?>
+								<div class="new_test_failures">
+									<hr />
+									<?php $data = json_decode($request->test_data); foreach ($data->failures as $failure): ?>
+									<pre class="pre-scrollable"><?php echo $this->escape($failure); ?></pre>
+									<?php endforeach; ?>
+								</div>
+								<?php endif; ?>
+						</td>
+						<td>
+							<?php if (!$request->state && $request->is_mergeable) : ?>
+							<span class="btn btn-large btn-success"><i class="icon-ok icon-white"></i> Mergeable</span>
+							<?php elseif (!$request->state && !$request->is_mergeable) : ?>
+							<span class="btn btn-large btn-danger"><i class="icon-remove icon-white"></i> Not Mergeable</span>
+							<?php elseif (!$request->is_merged) : ?>
+							<span class="btn btn-large btn-inverse"><i class="icon-white icon-remove-circle"></i> Not Merged</span>
+							<?php else : ?>
+							<span class="btn btn-large"><i class="icon icon-ok-circle"></i> Merged</span>
+							<?php endif; ?>
+						</td>
+						<td><?php echo $this->ago(JFactory::getDate($request->updated_time)); ?></td>
+						</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<div class="span4">
+			<h3>Odio tincidunt nisi </h3>
+			<p>Odio tincidunt nisi nascetur phasellus nunc purus proin ut dapibus cursus enim mus, mattis hac scelerisque! Non, et sit aliquet, vel lectus! Dignissim nec integer magna sit pulvinar porta ultricies, mus velit integer aliquet adipiscing ac. Cum mattis amet ridiculus lectus scelerisque lorem nec mattis natoque porta lundium, duis massa, vel. Ut ac. Ut sit sed magna vut? Cras sed? Vel enim adipiscing nisi dapibus cursus, pellentesque in.</p>
+		</div>
+		<div class="span4">
+			<h3>Elementum ac velit sit in</h3>
+			<p>Elementum ac velit sit in! Amet platea mid in dis facilisis nascetur odio, est ac, tincidunt sit a ac, in elementum et turpis nisi adipiscing cras! Parturient, nec rhoncus egestas in aenean, nunc! Sit turpis mus? Eu proin, aenean. Amet aliquet! Scelerisque nec? Massa! </p>
+		</div>
+		<div class="span4">
+			<h3>Ut dis ac elit ac porta </h3>
+			<p> Ut dis ac elit ac porta adipiscing? Vel amet scelerisque urna massa aenean mid magnis, porttitor etiam pellentesque purus ut mauris, facilisis nisi enim! Amet porttitor lorem natoque etiam, ac rhoncus mus diam. Augue nunc! Et, turpis etiam integer, nunc natoque integer enim, ac aliquam! Magna integer, pulvinar tortor nec ac scelerisque sed! Lectus, odio, pulvinar enim et, eu! Lectus nisi! Duis amet magnis magna urna, mus? Scelerisque placerat, cras urna elementum mauris purus egestas.</p>
+		</div>
+	</div>

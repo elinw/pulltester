@@ -22,13 +22,90 @@ class PTApplicationWeb extends JApplicationWeb
 	 */
 	protected $db;
 
+	/**
+	 * @var    PTTheme  A theme for the application to use.
+	 * @since  1.0
+	 */
+	protected $theme;
+
 	private $_routes = array(
 		'login' => 'login',
 		'logout' => 'logout',
 		'requests' => 'requests',
 		'requests/:request_id' => 'request',
-		'requests/:request_id/:report_type', 'requestReport'
+		'requests/:request_id/:report_type' => 'requestReport'
 	);
+
+	/**
+	 * Get the theme.
+	 *
+	 * @return  PTTheme  The application theme.
+	 *
+	 * @since   1.0
+	 */
+	public function getTheme()
+	{
+		return $this->theme;
+	}
+
+	/**
+	 * Method to create a database driver for the application.
+	 *
+	 * @return  PTApplicationWeb  This object for method chaining.
+	 *
+	 * @since   1.0
+	 */
+	public function loadDatabase()
+	{
+		// Handle the db_name separately due to a default etc path option.
+		$dbName = $this->get('db_name');
+		if (strpos($dbName, '@etc') === 0)
+		{
+			$dbName = JPATH_CONFIGURATION . substr($dbName, 4);
+		}
+
+		$this->db = JDatabaseDriver::getInstance(
+			array(
+				'driver' => $this->get('db_driver'),
+				'host' => $this->get('db_host'),
+				'user' => $this->get('db_user'),
+				'password' => $this->get('db_pass'),
+				'database' => $dbName,
+				'prefix' => $this->get('db_prefix')
+			)
+		);
+
+		// Select the database.
+		$this->db->select($dbName);
+
+		// Set the debug flag.
+		$this->db->setDebug($this->get('debug'));
+
+		// Set the database to our static cache.
+		JFactory::$database = $this->db;
+
+		return $this;
+	}
+
+	/**
+	 * Method to create a theme for the application.
+	 *
+	 * @param   PTTheme  $theme  The optional theme to load.
+	 *
+	 * @return  PTApplicationWeb  This object for method chaining.
+	 *
+	 * @since   1.0
+	 */
+	public function loadTheme(PTTheme $theme = null)
+	{
+		// Get the theme.
+		$this->theme = isset($theme) ? $theme : new PTTheme;
+
+		// Merge the application options.
+		$this->theme->options->loadObject($this->config->toObject());
+
+		return $this;
+	}
 
 	/**
 	 * Execute the application.
@@ -40,7 +117,7 @@ class PTApplicationWeb extends JApplicationWeb
 	protected function doExecute()
 	{
 		$router = new JApplicationWebRouterBase($this);
-		$router->setControllerPrefix('PTControllerPage')
+		$router->setControllerPrefix('PTPage')
 			->setDefaultController('requests')
 			->addMaps($this->_routes)
 			->execute($this->get('uri.route'));
@@ -108,44 +185,5 @@ class PTApplicationWeb extends JApplicationWeb
 		}
 
 		return $config;
-	}
-
-	/**
-	 * Method to create a database driver for the application.
-	 *
-	 * @return  PTApplicationCli  This object for method chaining.
-	 *
-	 * @since   1.0
-	 */
-	public function loadDatabase()
-	{
-		// Handle the db_name separately due to a default etc path option.
-		$dbName = $this->get('db_name');
-		if (strpos($dbName, '@etc') === 0)
-		{
-			$dbName = JPATH_CONFIGURATION . substr($dbName, 4);
-		}
-
-		$this->db = JDatabaseDriver::getInstance(
-			array(
-				'driver' => $this->get('db_driver'),
-				'host' => $this->get('db_host'),
-				'user' => $this->get('db_user'),
-				'password' => $this->get('db_pass'),
-				'database' => $dbName,
-				'prefix' => $this->get('db_prefix')
-			)
-		);
-
-		// Select the database.
-		$this->db->select($dbName);
-
-		// Set the debug flag.
-		$this->db->setDebug($this->get('debug'));
-
-		// Set the database to our static cache.
-		JFactory::$database = $this->db;
-
-		return $this;
 	}
 }

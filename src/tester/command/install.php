@@ -14,7 +14,7 @@
  * @subpackage  Controller
  * @since       1.0
  */
-class PTControllerCommandInstall extends JControllerBase
+class PTCommandInstall extends JControllerBase
 {
 	/**
 	 * Method to execute the controller.

@@ -19,15 +19,16 @@ class PTParserCheckstyle extends PTParser
 	/**
 	 * Parse a Checkstyle XML report into a value object.
 	 *
-	 * @param   string  $file  The filesystem path of the checkstyle report to parse.
+	 * @param   PTTestReportCheckstyle  $report  The report on which to bind parsed data.
+	 * @param   string                  $file    The filesystem path of the checkstyle report to parse.
 	 *
-	 * @return  PTObjectCheckstyle
+	 * @return  PTTestReportCheckstyle
 	 *
 	 * @see     PTParser::parse()
 	 * @since   1.0
 	 * @throws  RuntimeException
 	 */
-	public function parse($file)
+	public function parse($report, $file)
 	{
 		// Verify that the report file exists.
 		if (!file_exists($file) || filesize($file) < 1)
@@ -37,9 +38,6 @@ class PTParserCheckstyle extends PTParser
 
 		// Clean all the paths in the file.
 		file_put_contents($file, $this->cleanPaths(file_get_contents($file)));
-
-		// Create the report data object.
-		$report = new PTObjectCheckstyle;
 
 		$reader = new XMLReader;
 		$reader->open($file);
@@ -59,7 +57,7 @@ class PTParserCheckstyle extends PTParser
 					$e->line = (int) $reader->getAttribute('line');
 					$e->message = $reader->getAttribute('message');
 
-					$report->data['warnings'][] = $e;
+					$report->data->warnings[] = $e;
 				}
 
 				if ($reader->getAttribute('severity') == 'error')
@@ -69,7 +67,7 @@ class PTParserCheckstyle extends PTParser
 					$e->line = (int) $reader->getAttribute('line');
 					$e->message = $reader->getAttribute('message');
 
-					$report->data['errors'][] = $e;
+					$report->data->errors[] = $e;
 				}
 			}
 		}
@@ -77,8 +75,8 @@ class PTParserCheckstyle extends PTParser
 		$reader->close();
 
 		// Set the aggregate counts.
-		$report->errorCount = count($report->data['errors']);
-		$report->warningCount = count($report->data['warnings']);
+		$report->error_count = count($report->data->errors);
+		$report->warning_count = count($report->data->warnings);
 
 		return $report;
 	}

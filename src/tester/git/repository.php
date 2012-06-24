@@ -35,6 +35,31 @@ class PTGitRepository
 	}
 
 	/**
+	 * Get the SHA1 hash for the current HEAD commit.
+	 *
+	 * @return  string
+	 *
+	 * @since   1.0
+	 * @throws  RuntimeException
+	 */
+	public function getHeadSHA()
+	{
+		// Execute the command.
+		$wd = getcwd();
+		chdir($this->_root);
+		exec('git rev-parse HEAD', $out, $return);
+		chdir($wd);
+
+		// Validate the response.
+		if ($return !== 0)
+		{
+			throw new RuntimeException(sprintf('Failed to get the hash for the HEAD commit with code %d and message %s.', $return, implode("\n", $out)));
+		}
+
+		return trim(implode($out));
+	}
+
+	/**
 	 * Check if the repository exists.
 	 *
 	 * @return  boolean  True if the repository exists.
