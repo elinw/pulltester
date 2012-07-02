@@ -60,7 +60,7 @@ class PTGitRepository
 	}
 
 	/**
-	 * Check if the repository exists.
+	 * Check if the repository exists.  If we don't have a hidden git folder for the repository it doesn't exist.
 	 *
 	 * @return  boolean  True if the repository exists.
 	 *
@@ -68,8 +68,7 @@ class PTGitRepository
 	 */
 	public function exists()
 	{
-		// If we don't have a configuration file for the repository it doesn't exist.
-		return file_exists($this->_root . '/.git/config');
+		return file_exists($this->_root . '/.git');
 	}
 
 	/**
@@ -90,7 +89,7 @@ class PTGitRepository
 		$return = null;
 
 		// We add the users repo to our remote list if it isn't already there
-		if (!file_exists($this->_root . '/.git'))
+		if (!$this->exists())
 		{
 			// Execute the command.
 			exec('git clone -q ' . escapeshellarg($remote) . ' ' . escapeshellarg($this->_root), $out, $return);

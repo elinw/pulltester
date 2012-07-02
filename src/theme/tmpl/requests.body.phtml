@@ -94,7 +94,11 @@
 								<div class="new_test_errors">
 									<hr />
 									<?php $data = json_decode($request->test_data); foreach ($data->errors as $error): ?>
-									<pre class="pre-scrollable"><?php echo $this->escape($error); ?></pre>
+									<blockquote>
+										<h3><?php echo $echo->test; ?></h3>
+										<p><?php echo $this->escape($error->message); ?></p>
+										<small><?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></small>
+									</blockquote>
 									<?php endforeach; ?>
 								</div>
 								<?php endif; ?>
@@ -102,7 +106,11 @@
 								<div class="new_test_failures">
 									<hr />
 									<?php $data = json_decode($request->test_data); foreach ($data->failures as $failure): ?>
-									<pre class="pre-scrollable"><?php echo $this->escape($failure); ?></pre>
+									<blockquote>
+										<p><?php echo $failure->test; ?></p>
+										<pre><?php echo $this->escape($failure->message); ?></pre>
+										<small><?php echo $failure->file; ?> : <span><?php echo $failure->line; ?></span></small>
+									</blockquote>
 									<?php endforeach; ?>
 								</div>
 								<?php endif; ?>

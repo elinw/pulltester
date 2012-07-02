@@ -258,6 +258,44 @@ class PTRepository extends JModelDatabase
 	 *
 	 * @since   1.0
 	 */
+	public function clean()
+	{
+		// Get the repository object from the database.
+		$query = $this->db->getQuery(true);
+		$query->select('report_id')
+			->from('#__pull_request_test_unit_test_reports')
+			->where('(error_count > 0 OR failure_count > 0)');
+		$this->db->setQuery($query);
+
+		$list = $this->db->loadColumn();
+		foreach ($list as $report)
+		{
+			$unit = new PTTestReportUnittest($this->db);
+			$unit->load($report);
+
+			foreach ($unit->data->errors as $i => $error)
+			{
+				$error->message = str_replace("<br />", "\n", $error->message);
+				$unit->data->errors[$i] = $error;
+			}
+
+			foreach ($unit->data->failures as $i => $failure)
+			{
+				$failure->message = str_replace("<br />", "\n", $failure->message);
+				$unit->data->failures[$i] = $failure;
+			}
+
+			$unit->store();
+		}
+	}
+
+	/**
+	 * Test the master branch and update the database.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
 	public function testMaster()
 	{
 		$this->resetToStaging();
@@ -276,7 +314,6 @@ class PTRepository extends JModelDatabase
 		// Reset some repository values.
 		$repository->head_revision = $sha;
 		$repository->updated_time = JFactory::getDate()->toSql();
-		$repository->data = array();
 
 		// Create the checkstyle report object.
 		$checkstyle = new PTTestReportCheckstyle($this->db);
@@ -286,15 +323,17 @@ class PTRepository extends JModelDatabase
 			$checkstyle = $this->runCheckstyleReport($checkstyle);
 			$repository->style_error_count = $checkstyle->error_count;
 			$repository->style_warning_count = $checkstyle->warning_count;
-			$repository->data['checkstyle'] = array('errors' => $checkstyle->data['errors'], 'warnings' => $checkstyle->data['warnings']);
+			$repository->data->checkstyle->errors = $checkstyle->data->errors;
+			$repository->data->checkstyle->warnings = $checkstyle->data->warnings;
 		}
 		catch (RuntimeException $e)
 		{
-			$repository->data['checkstyle'] = false;
+			$repository->data->checkstyle = false;
 			JLog::add(sprintf('Checkstyle could not be run for the master branch.  Error message `%s`.', $e->getMessage()), JLog::DEBUG);
 		}
 
-		// Create the unit test report object.
+		/*
+		 * Create the unit test report object.
 		$unit = new PTTestReportUnittest($this->db);
 
 		try
@@ -303,13 +342,14 @@ class PTRepository extends JModelDatabase
 			$unit = $this->runLegacyUnitTestReport($unit);
 			$repository->test_failure_count = $unit->failure_count;
 			$repository->test_error_count = $unit->error_count;
-			$repository->data['unit'] = array('errors' => $unit->data['errors'], 'failures' => $unit->data['failures']);
+			$repository->data->unit = array('errors' => $unit->data->errors, 'failures' => $unit->data->failures);
 		}
 		catch (RuntimeException $e)
 		{
-			$test->data['unit'] = false;
+			$test->data->unit = false;
 			JLog::add(sprintf('Unit tests could not be run for the master branch.  Error message `%s`.', $e->getMessage()), JLog::DEBUG);
 		}
+		*/
 
 		// Update the database with our new information.
 		$repository->data = json_encode($repository->data);
@@ -433,6 +473,54 @@ class PTRepository extends JModelDatabase
 	}
 
 	/**
+	 * Parse the message into a report entry.
+	 *
+	 * @param   string  $message  The unit test message to parse.
+	 *
+	 * @return  object
+	 *
+	 * @since   1.0
+	 */
+	protected function parseUnitTestMessage($message)
+	{
+		// Initialize variables.
+		$report = new stdClass;
+		$message = explode("\n", trim($message));
+
+		// Strip off the trailing phpunit line from the stacktrace.
+		if (strpos(end($message), 'phpunit') !== false)
+		{
+			array_pop($message);
+		}
+
+		// Extract the stack trace.
+		$report->stack = array();
+		foreach ($message as $k => $line)
+		{
+			if (strpos($line, '.../') === 0)
+			{
+				$report->stack[] = $line;
+				unset($message[$k]);
+			}
+		}
+
+		// The last line of the stack trace is our "file" and "line" for the report.
+		$line = end($report->stack);
+		$report->file = substr($line, 0, strrpos($line, ':'));
+		$report->line = (int) substr($line, strrpos($line, ':') + 1);
+
+		// Cleanup the message.
+		$message = array_values($message);
+		$message = explode("\n", trim(implode("\n", $message)));
+
+		// Set the test and message body.
+		$report->test = array_shift($message);
+		$report->message = implode("\n", $message);
+
+		return $report;
+	}
+
+	/**
 	 * Execute PHP_CodeSniffer over the repository.
 	 *
 	 * @param   PTTestReportCheckstyle  $report  The report object to populate.
@@ -445,8 +533,8 @@ class PTRepository extends JModelDatabase
 	{
 		$repository = $this->_fetchRepositoryObject();
 
-		$localErrors = $repository->data->checkstyle->errors;
-		$localWarnings = $repository->data->checkstyle->warnings;
+		$localErrors = (array) $repository->data->checkstyle->errors;
+		$localWarnings = (array) $repository->data->checkstyle->warnings;
 
 		if (isset($report->data->errors))
 		{
@@ -614,7 +702,22 @@ class PTRepository extends JModelDatabase
 		$this->db->setQuery($query, 0, 1);
 
 		$this->_repository = $this->db->loadObject();
+
+		// Ensure we have a solid footing for our data object.
 		$this->_repository->data = json_decode($this->_repository->data);
+		if (is_scalar($this->_repository->data))
+		{
+			$this->_repository->data = new stdClass;
+		}
+		elseif (is_array($this->_repository->data))
+		{
+			$this->_repository->data = (object) $this->_repository->data;
+		}
+
+		if (!isset($this->_repository->data->checkstyle))
+		{
+			$this->_repository->data->checkstyle = new stdClass;
+		}
 
 		return $this->_repository;
 	}

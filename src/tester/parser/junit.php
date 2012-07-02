@@ -68,7 +68,7 @@ class PTParserJunit extends PTParser
 
 				if ($s)
 				{
-					$report->data->errors[] = $this->cleanPaths($s);
+					$report->data->errors[] = $this->parseUnitTestMessage($this->cleanPaths($s));
 				}
 			}
 
@@ -78,13 +78,61 @@ class PTParserJunit extends PTParser
 
 				if ($s)
 				{
-					$report->data->failures[] = $this->cleanPaths($s);
+					$report->data->failures[] = $this->parseUnitTestMessage($this->cleanPaths($s));
 				}
 			}
 		}
 
 		// Clean up.
 		$reader->close();
+
+		return $report;
+	}
+
+	/**
+	 * Parse the message into a report entry.
+	 *
+	 * @param   string  $message  The unit test message to parse.
+	 *
+	 * @return  object
+	 *
+	 * @since   1.0
+	 */
+	protected function parseUnitTestMessage($message)
+	{
+		// Initialize variables.
+		$report = new stdClass;
+		$message = explode("\n", trim($message));
+
+		// Strip off the trailing phpunit line from the stacktrace.
+		if (strpos(end($message), 'phpunit') !== false)
+		{
+			array_pop($message);
+		}
+
+		// Extract the stack trace.
+		$report->stack = array();
+		foreach ($message as $k => $line)
+		{
+			if (strpos($line, '.../') === 0)
+			{
+				$report->stack[] = $line;
+				unset($message[$k]);
+			}
+		}
+
+		// The last line of the stack trace is our "file" and "line" for the report.
+		$line = end($report->stack);
+		$report->file = substr($line, 0, strrpos($line, ':'));
+		$report->line = (int) substr($line, strrpos($line, ':') + 1);
+
+		// Cleanup the message.
+		$message = array_values($message);
+		$message = explode("\n", trim(implode("\n", $message)));
+
+		// Set the test and message body.
+		$report->test = array_shift($message);
+		$report->message = implode("\n", $message);
 
 		return $report;
 	}

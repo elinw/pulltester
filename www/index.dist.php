@@ -16,14 +16,14 @@ $joomla = getenv('JOOMLA_HOME') ?: '/usr/local/joomla';
 try
 {
 	// Look for the Joomla Platform in the production installed location.
-	if (file_exists($joomla . '/lib/platform.phar'))
+	if (file_exists($joomla . '/lib/joomla.phar'))
 	{
-		require_once $joomla . '/lib/platform.phar';
+		require_once $joomla . '/lib/joomla.phar';
 	}
 	// Development location.
-	elseif (file_exists(dirname(__DIR__) . '/lib/platform.phar'))
+	elseif (file_exists(dirname(__DIR__) . '/lib/joomla.phar'))
 	{
-		require_once dirname(__DIR__) . '/lib/platform.phar';
+		require_once dirname(__DIR__) . '/lib/joomla.phar';
 	}
 	// Panic.
 	else
