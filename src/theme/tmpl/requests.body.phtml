@@ -23,7 +23,7 @@
 				</thead>
 				<tbody>
 				<?php foreach($this->model->getRequests() as $request) : $body = substr(strip_tags($request->data->body), 0, 250); $request->tested_data = json_decode($request->tested_data); ?>
-					<tr>
+					<tr id="<?php echo $request->github_id; ?>">
 						<td>
 							<a href="<?php echo $request->data->html_url; ?>">
 								<?php echo $request->github_id; ?></a>
@@ -74,7 +74,8 @@
 									<?php $data = json_decode($request->style_data); foreach ($data->new_warnings as $warning): ?>
 									<blockquote>
 										<p><?php echo $warning->message; ?>.</p>
-										<small><?php echo $warning->file; ?> : <span><?php echo $warning->line; ?></span></small>
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($warning->file, 3) . '#L' . $warning->line; ?>" target="_blank">
+											<?php echo $warning->file; ?> : <span><?php echo $warning->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
 								</div>
@@ -85,7 +86,8 @@
 									<?php $data = json_decode($request->style_data); foreach ($data->new_errors as $error): ?>
 									<blockquote>
 										<p><?php echo $error->message; ?>.</p>
-										<small><?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></small>
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($error->file, 3) . '#L' . $error->line; ?>" target="_blank">
+											<?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
 								</div>
@@ -97,7 +99,8 @@
 									<blockquote>
 										<h3><?php echo $echo->test; ?></h3>
 										<p><?php echo $this->escape($error->message); ?></p>
-										<small><?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></small>
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($error->file, 3) . '#L' . $error->line; ?>" target="_blank">
+											<?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
 								</div>
@@ -109,7 +112,8 @@
 									<blockquote>
 										<p><?php echo $failure->test; ?></p>
 										<pre><?php echo $this->escape($failure->message); ?></pre>
-										<small><?php echo $failure->file; ?> : <span><?php echo $failure->line; ?></span></small>
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($failure->file, 3) . '#L' . $failure->line; ?>" target="_blank">
+											<?php echo $failure->file; ?> : <span><?php echo $failure->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
 								</div>

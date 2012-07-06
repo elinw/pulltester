@@ -1,6 +1,6 @@
 /* CSS Document */
 body {
-	padding-top:40px;
+/*	padding-top:40px; */
 }
 .thumbnail {
 	margin-bottom:9px;
@@ -153,7 +153,7 @@ body {
 		padding-top: 0;
 	}
 	.header {
-		background:transparent;	
+		background:transparent;
 	}
 	.row-fluid .offset1 {
 	  margin-left: 0!important;
@@ -190,7 +190,7 @@ body {
 	}
 	.header .brand {
 		float:none;
-		display:block;	
+		display:block;
 		text-align:center;
 	}
 	.header .nav.pull-right {
@@ -249,7 +249,7 @@ body {
 		z-index: 2;
 	}
 	.nav-tabs.nav-dark > li > a {
-		border: 1px solid #333;	
+		border: 1px solid #333;
 	}
 	.nav-tabs > li:last-child > a, .nav-tabs > .active:last-child > a {
 		border-bottom:1px solid #333;

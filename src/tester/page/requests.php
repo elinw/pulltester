@@ -26,7 +26,7 @@ class PTPageRequests extends PTPage
 	public function build()
 	{
 		$state = $this->getModelState();
-		$state->set('list.filter.state', $this->input->get('list_state'));
+		$state->set('list.filter.state', $this->input->get('list_state', 1));
 		$state->set('list.filter.mergeable', $this->input->get('list_mergeable'));
 		$state->set('list.filter.user', $this->input->get('list_user'));
 
