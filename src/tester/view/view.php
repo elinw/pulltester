@@ -28,22 +28,14 @@ class PTView extends JViewHtml
 	 */
 	public function ago(JDate $from, JDate $to = null)
 	{
-		// Defaults and assume if 0 is passed in that its an error rather than the epoch
-		$from = $from->getTimestamp();
-		if ($from == 0)
-		{
-			return 'Long ago...';
-		}
-
-		// Make sure we have a to timestamp.
+		// Make sure we have a to date.
 		if (empty($to))
 		{
 			$to = new JDate;
 		}
-		$to = $to->getTimestamp();
 
-		// Calculate the difference in seconds betweeen the two timestamps
-		$difference = $to - $from;
+		// Calculate the difference in seconds betweeen the two date objects.
+		$difference = $to->diff($from);
 
 		/*
 		 * Based on the interval, determine the number of units between the two dates From this point on, you would be hard
@@ -52,79 +44,39 @@ class PTView extends JViewHtml
 		 */
 		switch (true)
 		{
-			// If difference is less than 60 seconds, seconds is a good interval of choice
-			case (strtotime('-1 min', $to) < $from):
-				$datediff = $difference;
-				$res = ($datediff == 1) ? $datediff . ' second ago' : $datediff . ' seconds ago';
+			// If difference is greater than or equal to a year, return year.
+			case ($difference->y >= 1):
+				$res = ($difference->y == 1) ? $difference->y . ' year ago' : $difference->y . ' years ago';
 				break;
 
-			// If difference is between 60 seconds and 60 minutes, minutes is a good interval
-			case (strtotime('-1 hour', $to) < $from):
-				$datediff = floor($difference / 60);
-				$res = ($datediff == 1) ? $datediff . ' minute ago' : $datediff . ' minutes ago';
-				break;
-
-			// If difference is between 1 hour and 24 hours hours is a good interval
-			case (strtotime('-1 day', $to) < $from):
-				$datediff = floor($difference / 60 / 60);
-				$res = ($datediff == 1) ? $datediff . ' hour ago' : $datediff . ' hours ago';
-				break;
-
-			// If difference is between 1 day and 7 days days is a good interval
-			case (strtotime('-1 week', $to) < $from):
-				$dayDifference = 1;
-				while (strtotime('-' . $dayDifference . ' day', $to) >= $from)
-				{
-					$dayDifference++;
-				}
-
-				$datediff = $dayDifference;
-				$res = ($datediff == 1) ? 'yesterday' : $datediff . ' days ago';
+			case ($difference->m >= 1):
+				$res = ($difference->m == 1) ? $difference->m . ' month ago' : $difference->m . ' months ago';
 				break;
 
 			// If difference is between 1 week and 30 days weeks is a good interval
-			case (strtotime('-1 month', $to) < $from):
-				$weekDifference = 1;
-				while (strtotime('-' . $weekDifference . ' week', $to) >= $from)
-				{
-					$weekDifference++;
-				}
-
-				$datediff = $weekDifference;
-				$res = ($datediff == 1) ? 'last week' : $datediff . ' weeks ago';
+			case ($difference->d >= 7):
+				$weeks = floor($difference->d / 7);
+				$res = ($weeks == 1) ? 'last week' : $weeks . ' weeks ago';
 				break;
 
-			/*
-			 * If difference is between 30 days and 365 days months is a good interval, again, the same thing
-			 * applies, if the 29th February happens to exist between your 2 dates, the function will return
-			 * the 'incorrect' value for a day
-			 */
-			case (strtotime('-1 year', $to) < $from):
-				$monthDifference = 1;
-				while (strtotime('-' . $monthDifference . ' month', $to) >= $from)
-				{
-					$monthDifference++;
-				}
-
-				$datediff = $monthDifference;
-				$res = ($datediff == 1) ? $datediff . ' month ago' : $datediff . ' months ago';
-
+			// If difference is between 1 day and 7 days days is a good interval
+			case (0 < $difference->d && $difference->d < 7):
+				$res = ($difference->d == 1) ? 'yesterday' : $difference->d . ' days ago';
 				break;
 
-			/*
-			 * If difference is greater than or equal to 365 days, return year. This will be incorrect if
-			 * for example, you call the function on the 28th April 2008 passing in 29th April 2007. It will return
-			 * 1 year ago when in actual fact (yawn!) not quite a year has gone by
-			 */
-			case (strtotime('-1 year', $to) >= $from):
-				$yearDifference = 1;
-				while (strtotime('-' . $yearDifference . ' year', $to) >= $from)
-				{
-					$yearDifference++;
-				}
+			// If difference is between 1 hour and 24 hours hours is a good interval
+			case (0 < $difference->h && $difference->h < 24):
+				$res = ($difference->h == 1) ? $difference->h . ' hour ago' : $difference->h . ' hours ago';
+				break;
 
-				$datediff = $yearDifference;
-				$res = ($datediff == 1) ? $datediff . ' year ago' : $datediff . ' years ago';
+			// If difference is between 60 seconds and 60 minutes, minutes is a good interval
+			case (0 < $difference->i && $difference->i < 60):
+				$res = ($difference->i == 1) ? $difference->i . ' minute ago' : $difference->i . ' minutes ago';
+				break;
+
+			// If difference is less than 60 seconds, seconds is a good interval of choice
+			case ($difference->s < 60):
+				$res = ($difference->s == 1) ? $difference->s . ' second ago' : $difference->s . ' seconds ago';
 				break;
 		}
 
