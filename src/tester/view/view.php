@@ -58,12 +58,9 @@ class PTView extends JViewHtml
 		// Make sure we have a to timestamp.
 		if (empty($to))
 		{
-			$to = time();
+			$to = new JDate;
 		}
-		else
-		{
-			$to = $to->getTimestamp();
-		}
+		$to = $to->getTimestamp();
 
 		// Calculate the difference in seconds betweeen the two timestamps
 		$difference = $to - $from;

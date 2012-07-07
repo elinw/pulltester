@@ -758,10 +758,10 @@ class PTRepository extends JModelDatabase
 				$request->is_merged = ($pull->merged ? 1 : 0);
 				$request->user = $pull->user->login;
 				$request->avatar_url = $pull->user->avatar_url;
-				$request->created_time = JFactory::getDate($pull->created_at)->toSql();
-				$request->updated_time = JFactory::getDate($pull->created_at)->toSql();
-				$request->closed_time = JFactory::getDate($pull->created_at)->toSql();
-				$request->merged_time = JFactory::getDate($pull->created_at)->toSql();
+				$request->created_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
+				$request->updated_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
+				$request->closed_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
+				$request->merged_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
 				$request->data = $pull;
 
 				if (!$request->check())

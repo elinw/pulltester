@@ -74,7 +74,7 @@
 									<?php $data = json_decode($request->style_data); foreach ($data->new_warnings as $warning): ?>
 									<blockquote>
 										<p><?php echo $warning->message; ?>.</p>
-										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($warning->file, 3) . '#L' . $warning->line; ?>" target="_blank">
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/blob/' . $request->data->head->ref . substr($warning->file, 3) . '#L' . $warning->line; ?>" target="_blank">
 											<?php echo $warning->file; ?> : <span><?php echo $warning->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
@@ -86,7 +86,7 @@
 									<?php $data = json_decode($request->style_data); foreach ($data->new_errors as $error): ?>
 									<blockquote>
 										<p><?php echo $error->message; ?>.</p>
-										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($error->file, 3) . '#L' . $error->line; ?>" target="_blank">
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/blob/' . $request->data->head->ref . substr($error->file, 3) . '#L' . $error->line; ?>" target="_blank">
 											<?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
@@ -97,9 +97,9 @@
 									<hr />
 									<?php $data = json_decode($request->test_data); foreach ($data->errors as $error): ?>
 									<blockquote>
-										<h3><?php echo $echo->test; ?></h3>
+										<h3><?php echo $error->test; ?></h3>
 										<p><?php echo $this->escape($error->message); ?></p>
-										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($error->file, 3) . '#L' . $error->line; ?>" target="_blank">
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/blob/' . $request->data->head->ref . substr($error->file, 3) . '#L' . $error->line; ?>" target="_blank">
 											<?php echo $error->file; ?> : <span><?php echo $error->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
@@ -112,7 +112,7 @@
 									<blockquote>
 										<p><?php echo $failure->test; ?></p>
 										<pre><?php echo $this->escape($failure->message); ?></pre>
-										<small><a href="<?php echo $request->data->head->repo->html_url . '/tree/' . $request->data->head->ref . substr($failure->file, 3) . '#L' . $failure->line; ?>" target="_blank">
+										<small><a href="<?php echo $request->data->head->repo->html_url . '/blob/' . $request->data->head->ref . substr($failure->file, 3) . '#L' . $failure->line; ?>" target="_blank">
 											<?php echo $failure->file; ?> : <span><?php echo $failure->line; ?></span></a></small>
 									</blockquote>
 									<?php endforeach; ?>
@@ -130,7 +130,7 @@
 							<span class="btn btn-large"><i class="icon icon-ok-circle"></i> Merged</span>
 							<?php endif; ?>
 						</td>
-						<td><?php echo $this->ago(JFactory::getDate($request->updated_time)); ?></td>
+						<td><?php echo $this->ago(new JDate($request->updated_time)); ?></td>
 						</tr>
 				<?php endforeach; ?>
 				</tbody>
