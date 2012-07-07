@@ -41,12 +41,12 @@
 									<span class="btn btn-mini btn-danger"><i class="icon-warning-sign icon-white"></i> Unable to Run Checkstyle</span>
 								<?php else: ?>
 									<?php if ($request->style_warnings) : ?>
-									<span class="btn btn-mini btn-warning"><i><?php echo $request->style_warnings; ?></i> Style Warnings</span>
+									<span class="btn btn-mini btn-warning" data-toggle="collapse" data-target=".new_style_warnings_<?php echo $request->github_id; ?>"><i><?php echo $request->style_warnings; ?></i> Style Warnings</span>
 									<?php else: ?>
 									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Test Warnings</span>
 									<?php endif; ?>
 									<?php if ($request->style_errors) : ?>
-									<span class="btn btn-mini btn-danger"><i><?php echo $request->style_errors; ?></i> Style Errors</span>
+									<span class="btn btn-mini btn-danger" data-toggle="collapse" data-target=".new_style_errors_<?php echo $request->github_id; ?>"><i><?php echo $request->style_errors; ?></i> Style Errors</span>
 									<?php else: ?>
 									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Style Errors</span>
 									<?php endif; ?>
@@ -57,19 +57,19 @@
 									<span class="btn btn-mini btn-danger"><i class="icon-warning-sign icon-white"></i> Unable to Run Legacy Unit Tests</span>
 								<?php else: ?>
 								<?php if ($request->test_errors) : ?>
-									<span class="btn btn-mini btn-danger"><i><?php echo $request->test_errors; ?></i> Test Errors</span>
+									<span class="btn btn-mini btn-danger" data-toggle="collapse" data-target=".new_test_errors_<?php echo $request->github_id; ?>"><i><?php echo $request->test_errors; ?></i> Test Errors</span>
 									<?php else: ?>
 									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Test Errors</span>
 									<?php endif; ?>
 									<?php if ($request->test_failures) : ?>
-									<span class="btn btn-mini btn-danger"><i><?php echo $request->test_failures; ?></i> Test Failures</span>
+									<span class="btn btn-mini btn-danger" data-toggle="collapse" data-target=".new_test_failures_<?php echo $request->github_id; ?>"><i><?php echo $request->test_failures; ?></i> Test Failures</span>
 									<?php else: ?>
 									<span class="btn btn-mini"><i class="icon-<?php echo ($request->tested_time ? 'ok' : 'question-sign');?> icon"></i> Test Failures</span>
 									<?php endif; ?>
 								<?php endif; ?>
 							</p>
 								<?php if ($request->style_warnings) : ?>
-								<div class="new_style_warnings">
+								<div class="new_style_warnings_<?php echo $request->github_id; ?> collapse">
 									<hr />
 									<?php $data = json_decode($request->style_data); foreach ($data->new_warnings as $warning): ?>
 									<blockquote>
@@ -81,7 +81,7 @@
 								</div>
 								<?php endif; ?>
 								<?php if ($request->style_errors) : ?>
-								<div class="new_style_errors">
+								<div class="new_style_errors_<?php echo $request->github_id; ?> collapse">
 									<hr />
 									<?php $data = json_decode($request->style_data); foreach ($data->new_errors as $error): ?>
 									<blockquote>
@@ -93,7 +93,7 @@
 								</div>
 								<?php endif; ?>
 								<?php if ($request->test_errors) : ?>
-								<div class="new_test_errors">
+								<div class="new_test_errors_<?php echo $request->github_id; ?> collapse">
 									<hr />
 									<?php $data = json_decode($request->test_data); foreach ($data->errors as $error): ?>
 									<blockquote>
@@ -106,7 +106,7 @@
 								</div>
 								<?php endif; ?>
 								<?php if ($request->test_failures) : ?>
-								<div class="new_test_failures">
+								<div class="new_test_failures_<?php echo $request->github_id; ?> collapse">
 									<hr />
 									<?php $data = json_decode($request->test_data); foreach ($data->failures as $failure): ?>
 									<blockquote>

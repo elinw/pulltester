@@ -17,26 +17,6 @@
 class PTView extends JViewHtml
 {
 	/**
-	 * Method to get the layout path.
-	 *
-	 * @param   string  $layout  The layout name.
-	 *
-	 * @return  mixed  The layout file name if found, false otherwise.
-	 *
-	 * @since   12.1
-	 */
-	public function getPath($layout)
-	{
-		// Get the layout file name.
-		$file = JPath::clean($layout . '.phtml');
-
-		// Find the layout file path.
-		$path = JPath::find(clone ($this->paths), $file);
-
-		return $path;
-	}
-
-	/**
 	 * Get a formatted date difference.
 	 *
 	 * @param   JDate  $from  The from date.
@@ -149,5 +129,58 @@ class PTView extends JViewHtml
 		}
 
 		return $res;
+	}
+
+	/**
+	 * Method to get the layout path.
+	 *
+	 * @param   string  $layout  The layout name.
+	 *
+	 * @return  mixed  The layout file name if found, false otherwise.
+	 *
+	 * @since   12.1
+	 */
+	public function getPath($layout)
+	{
+		// Get the layout file name.
+		$file = JPath::clean($layout . '.phtml');
+
+		// Find the layout file path.
+		$path = JPath::find(clone ($this->paths), $file);
+
+		return $path;
+	}
+
+	/**
+	 * Method to render the view.
+	 *
+	 * @param   string  $layout  The name of the layout to render.
+	 *
+	 * @return  string  The rendered view.
+	 *
+	 * @since   12.1
+	 * @throws  RuntimeException
+	 */
+	public function render($layout = null)
+	{
+		// Get the layout path.
+		$path = $this->getPath($layout ? $layout : $this->getLayout());
+
+		// Check if the layout path was found.
+		if (!$path)
+		{
+			throw new RuntimeException('Layout Path Not Found');
+		}
+
+		// Start an output buffer.
+		ob_start();
+
+		// Load the layout.
+		include $path;
+
+		// Get the layout contents.
+		$output = ob_get_clean();
+
+		return $output;
 	}
 }
