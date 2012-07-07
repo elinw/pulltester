@@ -313,7 +313,8 @@ class PTRepository extends JModelDatabase
 
 		// Reset some repository values.
 		$repository->head_revision = $sha;
-		$repository->updated_time = JFactory::getDate()->toSql();
+		$now = new JDate;
+		$repository->updated_time = $now->toSql();
 
 		// Create the checkstyle report object.
 		$checkstyle = new PTTestReportCheckstyle($this->db);
@@ -398,7 +399,7 @@ class PTRepository extends JModelDatabase
 		// Create the test report object.
 		$test = new PTTestReport($this->db);
 		$test->pull_id = $request->pull_id;
-		$test->tested_time = $now->toISO8601();
+		$test->tested_time = $now->toSql();
 		$test->head_revision = $request->data->head->sha;
 		$test->base_revision = $request->data->base->sha;
 
@@ -759,9 +760,9 @@ class PTRepository extends JModelDatabase
 				$request->user = $pull->user->login;
 				$request->avatar_url = $pull->user->avatar_url;
 				$request->created_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
-				$request->updated_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
-				$request->closed_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
-				$request->merged_time = JFactory::getDate($pull->created_at, 'GMT')->toSql();
+				$request->updated_time = JFactory::getDate($pull->updated_at, 'GMT')->toSql();
+				$request->closed_time = JFactory::getDate($pull->closed_at, 'GMT')->toSql();
+				$request->merged_time = JFactory::getDate($pull->merged_at, 'GMT')->toSql();
 				$request->data = $pull;
 
 				if (!$request->check())
